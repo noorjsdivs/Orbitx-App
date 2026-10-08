@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { ScrollView, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { cubicBezier } from 'react-native-reanimated';
 
 import { haptic } from '@/hooks/use-haptics';
@@ -12,6 +12,19 @@ import { Txt } from './text';
 
 const springCurve = cubicBezier(...motion.spring);
 const popCurve = cubicBezier(...motion.pop);
+const outCurve = cubicBezier(...motion.out);
+
+type Box = { x: number; w: number };
+
+/** Measures each item so a single indicator can slide between them. */
+function useItemBoxes() {
+  const [boxes, setBoxes] = useState<Record<string, Box>>({});
+  const onItemLayout = (key: string) => (e: LayoutChangeEvent) => {
+    const { x, width } = e.nativeEvent.layout;
+    setBoxes((b) => (b[key] && b[key].x === x && b[key].w === width ? b : { ...b, [key]: { x, w: width } }));
+  };
+  return { boxes, onItemLayout };
+}
 
 /** Rounded filter chip (`chip()` in the design). */
 export function Chip({ label, selected, onPress, h = 34 }: { label: string; selected?: boolean; onPress?: () => void; h?: number }) {
@@ -48,7 +61,10 @@ export function ChipRow({ children, style }: { children: React.ReactNode; style?
 
 export type SegOption<T extends string> = { value: T; label: string; activeBg?: string };
 
-/** Segmented control on an s2 track with a raised selected segment (`seg()`). */
+/**
+ * Segmented control on an s2 track. The raised selection slides between segments
+ * and cross-fades its color (e.g. Buy green → Sell red).
+ */
 export function Seg<T extends string>({
   options,
   value,
@@ -65,28 +81,46 @@ export function Seg<T extends string>({
   size?: number;
 }) {
   const c = useColors();
+  const [w, setW] = useState(0);
+  const idx = Math.max(
+    0,
+    options.findIndex((o) => o.value === value),
+  );
+  const active = options[idx];
+  const seg = (w - 8) / options.length;
   return (
-    <View style={{ flexDirection: 'row', height: h, padding: 4, borderRadius: radius, backgroundColor: c.s2 }}>
+    <View onLayout={(e) => setW(e.nativeEvent.layout.width)} style={{ flexDirection: 'row', height: h, padding: 4, borderRadius: radius, backgroundColor: c.s2 }}>
+      {w > 0 && (
+        <Animated.View
+          style={{
+            position: 'absolute',
+            top: 4,
+            bottom: 4,
+            left: 4,
+            width: seg,
+            borderRadius: radius - 3,
+            backgroundColor: active?.activeBg ?? c.bg,
+            boxShadow: '0 1px 2px rgba(0,0,0,0.15)',
+            transform: [{ translateX: idx * seg }],
+            transitionProperty: ['transform', 'backgroundColor'],
+            transitionDuration: [380, 250],
+            transitionTimingFunction: [springCurve, 'ease'],
+          }}
+        />
+      )}
       {options.map((o) => {
         const sel = o.value === value;
         return (
           <Press
             key={o.value}
             scale={1}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: sel }}
             onPress={() => {
               if (!sel) haptic.tap();
               onChange(o.value);
             }}
-            style={{
-              flex: 1,
-              borderRadius: radius - 3,
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: sel ? (o.activeBg ?? c.bg) : 'transparent',
-              boxShadow: sel ? '0 1px 2px rgba(0,0,0,0.15)' : undefined,
-              transitionProperty: 'backgroundColor',
-              transitionDuration: 200,
-            }}>
+            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
             <Txt size={size} weight={500} color={sel ? (o.activeBg ? c.white : c.t1) : c.t3}>
               {o.label}
             </Txt>
@@ -121,7 +155,10 @@ export function SlidingSeg<T extends string>({
 }) {
   const c = useColors();
   const [w, setW] = useState(0);
-  const idx = Math.max(0, options.findIndex((o) => o.value === value));
+  const idx = Math.max(
+    0,
+    options.findIndex((o) => o.value === value),
+  );
   const seg = (w - (bordered ? 2 : 0) - 8) / options.length;
   return (
     <View
@@ -158,6 +195,8 @@ export function SlidingSeg<T extends string>({
           <Press
             key={o.value}
             scale={1}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: sel }}
             onPress={() => {
               if (!sel) haptic.tap();
               onChange(o.value);
@@ -173,7 +212,7 @@ export function SlidingSeg<T extends string>({
   );
 }
 
-/** Pill toggle like Lite / Pro or Dark / Light. */
+/** Pill toggle like Lite / Pro or Dark / Light, with a pill that slides to the selection. */
 export function PillToggle<T extends string>({
   options,
   value,
@@ -192,27 +231,43 @@ export function PillToggle<T extends string>({
   activeBg?: string;
 }) {
   const c = useColors();
+  const { boxes, onItemLayout } = useItemBoxes();
+  const active = options.find((o) => o.value === value);
+  const box = boxes[value];
+  const pad = h > 32 ? 3 : 2;
   return (
-    <View style={{ flexDirection: 'row', backgroundColor: track ?? c.s1, borderWidth: track ? 0 : 1, borderColor: c.line, borderRadius: 999, padding: h > 32 ? 3 : 2, gap: 2 }}>
+    <View style={{ flexDirection: 'row', backgroundColor: track ?? c.s1, borderWidth: track ? 0 : 1, borderColor: c.line, borderRadius: 999, padding: pad, gap: 2 }}>
+      {box && (
+        <Animated.View
+          style={{
+            position: 'absolute',
+            top: pad,
+            left: 0,
+            height: h,
+            width: box.w,
+            borderRadius: 999,
+            backgroundColor: active?.activeBg ?? activeBg ?? c.s3,
+            transform: [{ translateX: box.x }],
+            transitionProperty: ['transform', 'width', 'backgroundColor'],
+            transitionDuration: [450, 450, 250],
+            transitionTimingFunction: [springCurve, springCurve, 'ease'],
+          }}
+        />
+      )}
       {options.map((o) => {
         const sel = o.value === value;
         return (
           <Press
             key={o.value}
             scale={1}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: sel }}
+            onLayout={onItemLayout(o.value)}
             onPress={() => {
               if (!sel) haptic.tap();
               onChange(o.value);
             }}
-            style={{
-              height: h,
-              paddingHorizontal: h > 32 ? 14 : 10,
-              borderRadius: 999,
-              justifyContent: 'center',
-              backgroundColor: sel ? (o.activeBg ?? activeBg ?? c.s3) : 'transparent',
-              transitionProperty: 'backgroundColor',
-              transitionDuration: 250,
-            }}>
+            style={{ height: h, paddingHorizontal: h > 32 ? 14 : 10, borderRadius: 999, justifyContent: 'center' }}>
             <Txt size={size} weight={500} color={sel ? c.t1 : c.t3}>
               {o.label}
             </Txt>
@@ -225,7 +280,7 @@ export function PillToggle<T extends string>({
 
 export type TabItem<T extends string> = { value: T; label: string };
 
-/** Underlined text tabs (44h, 2px accent underline). */
+/** Text tabs with an accent underline that glides to the active tab. */
 export function UnderlineTabs<T extends string>({
   tabs,
   value,
@@ -244,39 +299,58 @@ export function UnderlineTabs<T extends string>({
   style?: StyleProp<ViewStyle>;
 }) {
   const c = useColors();
-  const items = tabs.map((t) => {
-    const sel = t.value === value;
-    return (
-      <Press
-        key={t.value}
-        scale={1}
-        onPress={() => {
-          if (!sel) haptic.tap();
-          onChange(t.value);
-        }}
-        style={{
-          height: 44,
-          paddingHorizontal: 10,
-          justifyContent: 'center',
-          borderBottomWidth: 2,
-          borderBottomColor: sel ? c.ac : 'transparent',
-          transitionProperty: 'borderBottomColor',
-          transitionDuration: 250,
-        }}>
-        <Txt size={size} weight={500} color={sel ? c.t1 : c.t3}>
-          {t.label}
-        </Txt>
-      </Press>
-    );
-  });
+  const { boxes, onItemLayout } = useItemBoxes();
+  const box = boxes[value];
+  const items = (
+    <View style={{ flexDirection: 'row', gap: 2 }}>
+      {tabs.map((t) => {
+        const sel = t.value === value;
+        return (
+          <Press
+            key={t.value}
+            scale={1}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: sel }}
+            onLayout={onItemLayout(t.value)}
+            onPress={() => {
+              if (!sel) haptic.tap();
+              onChange(t.value);
+            }}
+            style={{ height: 44, paddingHorizontal: 10, justifyContent: 'center' }}>
+            <Txt size={size} weight={500} color={sel ? c.t1 : c.t3}>
+              {t.label}
+            </Txt>
+          </Press>
+        );
+      })}
+      {box && (
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            left: 0,
+            bottom: 0,
+            height: 2,
+            width: box.w,
+            borderRadius: 1,
+            backgroundColor: c.ac,
+            transform: [{ translateX: box.x }],
+            transitionProperty: ['transform', 'width'],
+            transitionDuration: 320,
+            transitionTimingFunction: outCurve,
+          }}
+        />
+      )}
+    </View>
+  );
   return (
-    <View style={[{ flexDirection: 'row', alignItems: 'center', borderBottomWidth: StyleSheet.hairlineWidth * 2, borderBottomColor: c.hair, paddingHorizontal: 8 }, style]}>
+    <View style={[{ flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: c.hair, paddingHorizontal: 8 }, style]}>
       {scroll ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 2 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {items}
         </ScrollView>
       ) : (
-        <View style={{ flexDirection: 'row', gap: 2, flex: 1 }}>{items}</View>
+        <View style={{ flex: 1 }}>{items}</View>
       )}
       {right}
     </View>

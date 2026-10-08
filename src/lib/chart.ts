@@ -17,9 +17,7 @@ export function sparkPoints(sym: string, change: number): string {
   }
   const mn = Math.min(...pts);
   const mx = Math.max(...pts);
-  return pts
-    .map((y, i) => ((i / 27) * 64).toFixed(1) + ',' + (22 - ((y - mn) / (mx - mn || 1)) * 20).toFixed(1))
-    .join(' ');
+  return pts.map((y, i) => ((i / 27) * 64).toFixed(1) + ',' + (22 - ((y - mn) / (mx - mn || 1)) * 20).toFixed(1)).join(' ');
 }
 
 /** 40 candles walking backwards from the last price, seeded per symbol + timeframe. */
@@ -59,10 +57,6 @@ export function liveCandles(sym: string, tf: Timeframe, live: number): Candle[] 
 export function linePath(vals: number[], W: number, H: number) {
   const mn = Math.min(...vals);
   const mx = Math.max(...vals);
-  const line =
-    'M' +
-    vals
-      .map((v, i) => ((i / (vals.length - 1)) * W).toFixed(1) + ',' + (8 + ((mx - v) / (mx - mn || 1)) * (H - 16)).toFixed(1))
-      .join(' L');
+  const line = 'M' + vals.map((v, i) => ((i / (vals.length - 1)) * W).toFixed(1) + ',' + (8 + ((mx - v) / (mx - mn || 1)) * (H - 16)).toFixed(1)).join(' L');
   return { line, area: `${line} L${W},${H + 10} L0,${H + 10} Z`, mn, mx, up: vals[vals.length - 1] >= vals[0] };
 }

@@ -59,7 +59,20 @@ export default function Transfer() {
             haptic.tap();
             patch('transfer', { from: tr.to, to: tr.from, rot: !tr.rot, amt: '' });
           }}
-          style={{ alignSelf: 'center', width: 40, height: 40, marginVertical: -14, zIndex: 1, borderRadius: 10, borderWidth: 1, borderColor: c.s4, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
+          style={{
+            alignSelf: 'center',
+            width: 40,
+            height: 40,
+            marginVertical: -14,
+            zIndex: 1,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: c.s4,
+            backgroundColor: c.bg,
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+          }}>
           <Animated.View style={{ transform: [{ rotate: tr.rot ? '180deg' : '0deg' }], transitionProperty: 'transform', transitionDuration: 450, transitionTimingFunction: pop }}>
             <Icon name="swap" size={18} sw={2.2} />
           </Animated.View>
@@ -78,7 +91,14 @@ export default function Transfer() {
         </View>
       </Appear>
       <Appear i={2} style={{ marginHorizontal: 16, gap: 8 }}>
-        <FieldLabel right={<Txt size={13} color={c.t3}>Avbl {fmt(avbl, 2)} USDT</Txt>}>Amount</FieldLabel>
+        <FieldLabel
+          right={
+            <Txt size={13} color={c.t3}>
+              Avbl {fmt(avbl, 2)} USDT
+            </Txt>
+          }>
+          Amount
+        </FieldLabel>
         <Field
           value={tr.amt}
           onChangeText={(v) => patch('transfer', { amt: decimalInput(v) })}

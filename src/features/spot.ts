@@ -121,4 +121,3 @@ export function buildBook(sym: string, live: number, tick: number, view: BookVie
     step,
   };
 }
-

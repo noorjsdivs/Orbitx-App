@@ -1,7 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { SheetBody } from '@/components/layout/sheet';
+import { rowExit, rowLayout } from '@/components/motion/presets';
 import { Icon } from '@/components/ui/icon';
 import { Press } from '@/components/ui/press';
 import { Txt } from '@/components/ui/text';
@@ -142,40 +144,50 @@ export default function Picker() {
   return (
     <SheetBody title={title} px={12} gap={0}>
       {items.map((o) => (
-        <Press
-          key={o.key}
-          scale={1}
-          disabled={!o.onPress}
-          onPress={() => {
-            haptic.tap();
-            o.onPress?.();
-          }}
-          pressedStyle={{ backgroundColor: c.s3 }}
-          style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48, paddingVertical: 8, paddingHorizontal: 12, borderRadius: 10, backgroundColor: o.on && kind !== 'devices' ? c.s2 : 'transparent' }}>
-          {o.tag && (
-            <View style={{ paddingHorizontal: 6, paddingVertical: 3, borderRadius: 5, backgroundColor: c.s3 }}>
-              <Txt mono size={12}>
-                {o.tag}
+        <Animated.View key={o.key} exiting={rowExit} layout={rowLayout}>
+          <Press
+            scale={1}
+            disabled={!o.onPress}
+            onPress={() => {
+              haptic.tap();
+              o.onPress?.();
+            }}
+            pressedStyle={{ backgroundColor: c.s3 }}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+              minHeight: 48,
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              borderRadius: 10,
+              backgroundColor: o.on && kind !== 'devices' ? c.s2 : 'transparent',
+            }}>
+            {o.tag && (
+              <View style={{ paddingHorizontal: 6, paddingVertical: 3, borderRadius: 5, backgroundColor: c.s3 }}>
+                <Txt mono size={12}>
+                  {o.tag}
+                </Txt>
+              </View>
+            )}
+            <View style={{ flex: 1, gap: 2 }}>
+              <Txt size={15} weight={500}>
+                {o.label}
               </Txt>
+              {o.sub && (
+                <Txt size={12} color={c.t3}>
+                  {o.sub}
+                </Txt>
+              )}
             </View>
-          )}
-          <View style={{ flex: 1, gap: 2 }}>
-            <Txt size={15} weight={500}>
-              {o.label}
-            </Txt>
-            {o.sub && (
-              <Txt size={12} color={c.t3}>
-                {o.sub}
+            {o.on && <Icon name="check" size={18} sw={2.6} color={c.acT} />}
+            {o.action && (
+              <Txt size={13} weight={600} color={c.dn}>
+                {o.action}
               </Txt>
             )}
-          </View>
-          {o.on && <Icon name="check" size={18} sw={2.6} color={c.acT} />}
-          {o.action && (
-            <Txt size={13} weight={600} color={c.dn}>
-              {o.action}
-            </Txt>
-          )}
-        </Press>
+          </Press>
+        </Animated.View>
       ))}
     </SheetBody>
   );

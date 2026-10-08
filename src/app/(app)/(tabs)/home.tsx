@@ -4,8 +4,11 @@ import { useState } from 'react';
 import { View } from 'react-native';
 
 import { Sparkline } from '@/components/charts';
+import { Appear } from '@/components/layout/appear';
+import { useTween } from '@/components/motion/animated-number';
+import { MarketRefresh } from '@/components/motion/refresh';
 import { Screen } from '@/components/layout/screen';
-import { EmptyState, ErrorState, MarketRow, MarketRowSkeleton, SectionHead } from '@/components/market';
+import { AnimatedMarketRow, EmptyState, ErrorState, MarketRowSkeleton, SectionHead } from '@/components/market';
 import { Button } from '@/components/ui/button';
 import { PillToggle, UnderlineTabs } from '@/components/ui/controls';
 import { Icon, type IconName } from '@/components/ui/icon';
@@ -15,7 +18,6 @@ import { Txt } from '@/components/ui/text';
 import { AVATAR_URL } from '@/data/fixtures';
 import { ANNOUNCEMENTS, COINS, NEW_LISTINGS, PAIRS, SPARKS } from '@/data/market';
 import { MASK, useListStatus, usePortfolio } from '@/features/portfolio';
-import { useCountUp } from '@/hooks/use-count-up';
 import { useColors } from '@/hooks/use-theme';
 import { fmt, pct } from '@/lib/format';
 import { useGuard } from '@/lib/nav';
@@ -34,7 +36,11 @@ function TopBar() {
   const guest = useSession((s) => s.status === 'guest');
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4, paddingHorizontal: 8 }}>
-      <Press accessibilityLabel="Profile and security" scale={0.92} onPress={guard('Create an account to unlock your profile', () => router.push('/profile'))} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+      <Press
+        accessibilityLabel="Profile and security"
+        scale={0.92}
+        onPress={guard('Create an account to unlock your profile', () => router.push('/profile'))}
+        style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
         {guest ? (
           <View style={{ width: 34, height: 34, borderRadius: 17, backgroundColor: c.s2, borderWidth: 1, borderColor: c.s3, alignItems: 'center', justifyContent: 'center' }}>
             <Txt size={12} weight={600} color={c.acT}>
@@ -47,13 +53,20 @@ function TopBar() {
           </View>
         )}
       </Press>
-      <Press onPress={() => router.push('/search')} scale={0.99} style={{ flex: 1, height: 40, borderRadius: 10, backgroundColor: c.s2, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12 }}>
+      <Press
+        onPress={() => router.push('/search')}
+        scale={0.99}
+        style={{ flex: 1, height: 40, borderRadius: 10, backgroundColor: c.s2, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 12 }}>
         <Icon name="search" size={18} color={c.t3} />
         <Txt size={14} color={c.t3}>
           Search BTC, SOL, P2P…
         </Txt>
       </Press>
-      <Press accessibilityLabel="Notifications" scale={0.9} onPress={guard('Sign up to set price alerts', () => router.push('/notifications'))} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
+      <Press
+        accessibilityLabel="Notifications"
+        scale={0.9}
+        onPress={guard('Sign up to set price alerts', () => router.push('/notifications'))}
+        style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>
         <Icon name="bell" size={22} sw={1.7} />
         <View style={{ position: 'absolute', top: 10, right: 11, width: 8, height: 8, borderRadius: 4, backgroundColor: c.warn, borderWidth: 2, borderColor: c.bg }} />
       </Press>
@@ -69,14 +82,20 @@ function BalanceCard() {
   const hide = usePrefs((s) => s.hideBalance);
   const toggleHide = usePrefs((s) => s.toggleHide);
   const { total, todayPnl, todayPct } = usePortfolio();
-  const k = useCountUp('home');
-  const amt = guest ? '0.00' : hide ? MASK : fmt(total * k, 2);
+  // Counts up from 0 on entry, then rolls smoothly as live prices tick.
+  const shown = useTween(total, { from: 0, duration: 900 });
+  const pnlShown = useTween(todayPnl, { from: 0, duration: 900 });
+  const amt = guest ? '0.00' : hide ? MASK : fmt(shown, 2);
   const usd = guest ? '$0.00' : hide ? '$' + MASK : '$' + fmt(total, 2);
-  const pnl = guest ? '—' : hide ? MASK : `${todayPnl >= 0 ? '+' : ''}${fmt(todayPnl, 2)} (${pct(todayPct)})`;
+  const pnl = guest ? '—' : hide ? MASK : `${pnlShown >= 0 ? '+' : ''}${fmt(pnlShown, 2)} (${pct(todayPct)})`;
   const pnlCol = guest || hide ? c.t3 : todayPnl >= 0 ? c.up : c.dn;
   return (
     <Card gap={6} style={{ marginHorizontal: 16, marginTop: 12 }}>
-      <Press scale={1} onPress={toggleHide} accessibilityLabel={hide ? 'Show balance' : 'Hide balance'} style={{ alignSelf: 'flex-start', height: 32, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+      <Press
+        scale={1}
+        onPress={toggleHide}
+        accessibilityLabel={hide ? 'Show balance' : 'Hide balance'}
+        style={{ alignSelf: 'flex-start', height: 32, flexDirection: 'row', alignItems: 'center', gap: 6 }}>
         <Txt size={13} color={c.t2}>
           Est. total value
         </Txt>
@@ -156,9 +175,13 @@ function Watchlist() {
       : tab === 'hot'
         ? [...PAIRS].sort((a, b) => COINS[b].v - COINS[a].v).slice(0, 6)
         : tab === 'gain'
-          ? PAIRS.filter((k) => prices[k].c > 0).sort((a, b) => prices[b].c - prices[a].c).slice(0, 6)
+          ? PAIRS.filter((k) => prices[k].c > 0)
+              .sort((a, b) => prices[b].c - prices[a].c)
+              .slice(0, 6)
           : tab === 'lose'
-            ? PAIRS.filter((k) => prices[k].c < 0).sort((a, b) => prices[a].c - prices[b].c).slice(0, 6)
+            ? PAIRS.filter((k) => prices[k].c < 0)
+                .sort((a, b) => prices[a].c - prices[b].c)
+                .slice(0, 6)
             : NEW_LISTINGS;
   const status = useListStatus(list.length);
   const st = tab !== 'fav' && status === 'empty' && list.length ? 'ok' : status;
@@ -207,7 +230,7 @@ function Watchlist() {
           }}
         />
       )}
-      {st === 'ok' && list.map((k) => <MarketRow key={k} sym={k} onPress={() => router.push(`/coin/${k}`)} />)}
+      {st === 'ok' && list.map((k, i) => <AnimatedMarketRow key={`${tab}-${k}`} index={i} sym={k} onPress={() => router.push(`/coin/${k}`)} />)}
     </View>
   );
 }
@@ -229,7 +252,11 @@ function TopMovers() {
         action={
           <View style={{ flexDirection: 'row', backgroundColor: c.s1, borderRadius: 10, padding: 3 }}>
             {(['gainers', 'losers'] as const).map((m) => (
-              <Press key={m} scale={1} onPress={() => setMode(m)} style={{ height: 32, paddingHorizontal: 12, borderRadius: 8, justifyContent: 'center', backgroundColor: mode === m ? c.s3 : 'transparent' }}>
+              <Press
+                key={m}
+                scale={1}
+                onPress={() => setMode(m)}
+                style={{ height: 32, paddingHorizontal: 12, borderRadius: 8, justifyContent: 'center', backgroundColor: mode === m ? c.s3 : 'transparent' }}>
                 <Txt size={12} weight={500} color={mode === m ? c.t1 : c.t3}>
                   {m === 'gainers' ? 'Gainers' : 'Losers'}
                 </Txt>
@@ -239,7 +266,19 @@ function TopMovers() {
         }
       />
       {st === 'error' ? (
-        <View style={{ marginHorizontal: 16, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: c.line, backgroundColor: c.s1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+        <View
+          style={{
+            marginHorizontal: 16,
+            padding: 16,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: c.line,
+            backgroundColor: c.s1,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}>
           <Txt size={13} color={c.t2}>
             Movers unavailable right now.
           </Txt>
@@ -259,7 +298,11 @@ function TopMovers() {
                 const q = prices[k];
                 const col = q.c >= 0 ? c.up : c.dn;
                 return (
-                  <Press key={k} onPress={() => router.push(`/coin/${k}`)} pressedStyle={{ backgroundColor: c.s2 }} style={{ flex: 1, minWidth: 0, gap: 6, padding: 12, borderRadius: 10, backgroundColor: c.s1 }}>
+                  <Press
+                    key={k}
+                    onPress={() => router.push(`/coin/${k}`)}
+                    pressedStyle={{ backgroundColor: c.s2 }}
+                    style={{ flex: 1, minWidth: 0, gap: 6, padding: 12, borderRadius: 10, backgroundColor: c.s1 }}>
                     <Txt size={14} weight={600}>
                       {k}
                     </Txt>
@@ -353,7 +396,12 @@ function Announcements() {
       )}
       {st === 'ok' &&
         ANNOUNCEMENTS.map((a) => (
-          <Press key={a.d} scale={1} onPress={open} pressedStyle={{ backgroundColor: c.s1 }} style={{ flexDirection: 'row', gap: 12, alignItems: 'center', minHeight: 48, paddingVertical: 10, paddingHorizontal: 16, borderTopWidth: 1, borderTopColor: c.hair }}>
+          <Press
+            key={a.d}
+            scale={1}
+            onPress={open}
+            pressedStyle={{ backgroundColor: c.s1 }}
+            style={{ flexDirection: 'row', gap: 12, alignItems: 'center', minHeight: 48, paddingVertical: 10, paddingHorizontal: 16, borderTopWidth: 1, borderTopColor: c.hair }}>
             <Txt mono size={11} color={c.t3} style={{ width: 44 }}>
               {a.d}
             </Txt>
@@ -378,7 +426,7 @@ export default function Home() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
   return (
-    <Screen>
+    <Screen refreshControl={<MarketRefresh />}>
       <TopBar />
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, paddingHorizontal: 16 }}>
         <Txt size={15} color={c.t2}>
@@ -397,7 +445,20 @@ export default function Home() {
         />
       </View>
       {guest && (
-        <View style={{ marginTop: 12, marginHorizontal: 16, padding: 14, paddingLeft: 16, borderRadius: 14, backgroundColor: blend(c.ac, c.s1, 10), borderWidth: 1, borderColor: tint(c.ac, 35), flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View
+          style={{
+            marginTop: 12,
+            marginHorizontal: 16,
+            padding: 14,
+            paddingLeft: 16,
+            borderRadius: 14,
+            backgroundColor: blend(c.ac, c.s1, 10),
+            borderWidth: 1,
+            borderColor: tint(c.ac, 35),
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+          }}>
           <View style={{ flex: 1, gap: 3 }}>
             <Txt size={14} weight={600}>
               {"You're browsing as a guest"}
@@ -409,12 +470,20 @@ export default function Home() {
           <Button label="Sign up" h={40} size={13} onPress={() => router.push('/register')} />
         </View>
       )}
-      <BalanceCard />
-      <QuickActions />
-      <Watchlist />
-      <TopMovers />
-      <EarnPromo />
-      <Announcements />
+      <Appear i={1}>
+        <BalanceCard />
+      </Appear>
+      <Appear i={2}>
+        <QuickActions />
+      </Appear>
+      <Appear i={3}>
+        <Watchlist />
+      </Appear>
+      <Appear i={4}>
+        <TopMovers />
+        <EarnPromo />
+        <Announcements />
+      </Appear>
     </Screen>
   );
 }

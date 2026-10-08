@@ -1,8 +1,8 @@
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Animated, { cubicBezier } from 'react-native-reanimated';
+import Animated, { cubicBezier, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 import { TAB_BAR_H, useTabBarSpace } from '@/components/layout/screen';
 import { Icon, type IconName } from '@/components/ui/icon';
@@ -25,9 +25,7 @@ export function GlassBar({ count, active, children }: { count: number; active: n
   const [w, setW] = useState(0);
   const seg = w / count;
   return (
-    <View
-      pointerEvents="box-none"
-      style={[styles.wrap, { bottom, boxShadow: theme === 'dark' ? '0 18px 40px rgba(0,0,0,0.5)' : '0 12px 32px rgba(30,35,41,0.16)' }]}>
+    <View pointerEvents="box-none" style={[styles.wrap, { bottom, boxShadow: theme === 'dark' ? '0 18px 40px rgba(0,0,0,0.5)' : '0 12px 32px rgba(30,35,41,0.16)' }]}>
       <View
         style={[
           styles.bar,
@@ -76,6 +74,11 @@ export function GlassBar({ count, active, children }: { count: number; active: n
 /** Icon + label slot; optional numeric badge. */
 export function GlassBarItem({ label, icon, on, onPress, badge, badgeColor }: { label: string; icon: IconName; on: boolean; onPress: () => void; badge?: number; badgeColor?: string }) {
   const c = useColors();
+  const bounce = useSharedValue(1);
+  useEffect(() => {
+    if (on) bounce.set(withSequence(withTiming(1.16, { duration: 120 }), withSpring(1, { damping: 9, stiffness: 260 })));
+  }, [on, bounce]);
+  const iconStyle = useAnimatedStyle(() => ({ transform: [{ scale: bounce.value }] }));
   return (
     <Press
       accessibilityLabel={label}
@@ -86,16 +89,28 @@ export function GlassBarItem({ label, icon, on, onPress, badge, badgeColor }: { 
         onPress();
       }}
       style={styles.slot}>
-      <View>
+      <Animated.View style={iconStyle}>
         <Icon name={icon} size={22} sw={1.7} color={on ? c.t1 : c.t3} />
         {!!badge && (
-          <View style={{ position: 'absolute', top: -6, right: -12, minWidth: 18, height: 18, paddingHorizontal: 4, borderRadius: 9, backgroundColor: badgeColor ?? c.dn, alignItems: 'center', justifyContent: 'center' }}>
+          <View
+            style={{
+              position: 'absolute',
+              top: -6,
+              right: -12,
+              minWidth: 18,
+              height: 18,
+              paddingHorizontal: 4,
+              borderRadius: 9,
+              backgroundColor: badgeColor ?? c.dn,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
             <Txt size={10} weight={700} color={badgeColor === c.warn ? c.onAc : '#FFFFFF'}>
               {badge}
             </Txt>
           </View>
         )}
-      </View>
+      </Animated.View>
       <Txt size={10.5} weight={500} color={on ? c.t1 : c.t3}>
         {label}
       </Txt>

@@ -1,10 +1,13 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { AreaChart } from '@/components/charts';
 import { Appear } from '@/components/layout/appear';
 import { Header, IconButton, Screen } from '@/components/layout/screen';
+import { FlashPrice } from '@/components/motion/flash-price';
+import { fadeIn } from '@/components/motion/presets';
 import { Button } from '@/components/ui/button';
 import { Seg } from '@/components/ui/controls';
 import { Card, CoinGlyph, Footnote } from '@/components/ui/misc';
@@ -114,9 +117,9 @@ export default function CoinDetail() {
             </Txt>
           </View>
         </View>
-        <Txt size={36} weight={600} ls={-0.03} color={q.dir < 0 ? c.dn : c.t1}>
+        <FlashPrice value={q.p} dir={q.dir} size={36} weight={600} ls={-0.03} color={q.dir < 0 ? c.dn : c.t1} containerStyle={{ alignSelf: 'flex-start' }}>
           {fmt(q.p, co.dp)}
-        </Txt>
+        </FlashPrice>
         <Txt size={14} weight={500} color={q.c >= 0 ? c.up : c.dn}>
           {q.c >= 0 ? '+' : '-'}
           {fmt(chgAbs, co.dp)} ({pct(q.c)}){' '}
@@ -126,7 +129,7 @@ export default function CoinDetail() {
         </Txt>
       </Appear>
       <Appear i={1} style={{ marginHorizontal: 16 }}>
-        <View>
+        <Animated.View key={range} entering={fadeIn}>
           <AreaChart line={ch.line} area={ch.area} color={ch.up ? c.up : c.dn} height={190} />
           <Txt size={11} color={c.t3} style={{ position: 'absolute', right: 0, top: 0 }}>
             H {fmt(ch.mx, co.dp)}
@@ -134,15 +137,9 @@ export default function CoinDetail() {
           <Txt size={11} color={c.t3} style={{ position: 'absolute', left: 0, bottom: 0 }}>
             L {fmt(ch.mn, co.dp)}
           </Txt>
-        </View>
+        </Animated.View>
         <View style={{ marginTop: 12 }}>
-          <Seg<Range>
-            h={42}
-            size={13}
-            options={(['1D', '1W', '1M', '1Y'] as Range[]).map((r) => ({ value: r, label: r }))}
-            value={range}
-            onChange={setRange}
-          />
+          <Seg<Range> h={42} size={13} options={(['1D', '1W', '1M', '1Y'] as Range[]).map((r) => ({ value: r, label: r }))} value={range} onChange={setRange} />
         </View>
       </Appear>
       <Appear i={2} style={{ marginHorizontal: 16 }}>

@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { TextInput, View } from 'react-native';
 
 import { IconButton, Screen } from '@/components/layout/screen';
+import { useTween } from '@/components/motion/animated-number';
+import { MarketRefresh } from '@/components/motion/refresh';
 import { EmptyState, ErrorState } from '@/components/market';
 import { Button } from '@/components/ui/button';
 import { Checkbox, UnderlineTabs } from '@/components/ui/controls';
@@ -63,6 +65,8 @@ export default function Assets() {
     futures: ['Margin balance', pf.futTotal],
     earn: ['Earn holdings', pf.earnTotal],
   };
+  // Card total rolls to the new value when switching accounts or when prices tick.
+  const cardValue = useTween(card[tab][1], { duration: 600 });
   const subK = tab === 'futures' ? 'Unrealized PnL' : tab === 'earn' ? 'Yesterday' : "Today's PnL";
   const subRaw = tab === 'futures' ? pf.futPnl : tab === 'earn' ? 0.19 : tab === 'funding' ? 0 : pf.todayPnl;
   const subV = guest ? '—' : H ? MASK : tab === 'earn' ? '+0.19 USDT' : `${subRaw >= 0 ? '+' : ''}${fmt(subRaw, 2)}`;
@@ -93,7 +97,7 @@ export default function Assets() {
       : { t: 'No balances yet', d: 'Deposit crypto or buy USDT with P2P to get started.' };
 
   return (
-    <Screen>
+    <Screen refreshControl={<MarketRefresh />}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 4, paddingRight: 4, paddingLeft: 16 }}>
         <Txt size={24} weight={600} ls={-0.02}>
           Assets
@@ -127,7 +131,7 @@ export default function Assets() {
         </Press>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
           <Txt size={32} weight={600} ls={-0.02} lh={1.15}>
-            {money(card[tab][1])}
+            {money(cardValue)}
           </Txt>
           <Txt size={14} weight={500} color={c.t2}>
             USDT
@@ -166,7 +170,12 @@ export default function Assets() {
           </View>
           <View style={{ paddingTop: 4 }}>
             {accts.map((a) => (
-              <Press key={a.k} scale={1} onPress={() => setTab(a.k)} pressedStyle={{ backgroundColor: c.s1 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, paddingHorizontal: 16 }}>
+              <Press
+                key={a.k}
+                scale={1}
+                onPress={() => setTab(a.k)}
+                pressedStyle={{ backgroundColor: c.s1 }}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 10, height: 52, paddingHorizontal: 16 }}>
                 <View style={{ width: 8, height: 8, borderRadius: 2, backgroundColor: a.col }} />
                 <Txt size={15} weight={500} style={{ flex: 1 }}>
                   {a.name}
@@ -318,7 +327,12 @@ export default function Assets() {
             <Txt size={17} weight={600}>
               Balances
             </Txt>
-            <Press scale={1} onPress={() => setHideSmall(!hideSmall)} accessibilityRole="checkbox" accessibilityState={{ checked: hideSmall }} style={{ height: 44, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Press
+              scale={1}
+              onPress={() => setHideSmall(!hideSmall)}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: hideSmall }}
+              style={{ height: 44, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
               <Checkbox checked={hideSmall} />
               <Txt size={12} color={c.t2}>
                 {'Hide balances < 1 USDT'}

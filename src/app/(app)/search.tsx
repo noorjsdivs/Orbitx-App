@@ -1,9 +1,11 @@
 import { useRouter, type Href } from 'expo-router';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { Appear } from '@/components/layout/appear';
 import { Screen } from '@/components/layout/screen';
+import { popOut, rowLayout } from '@/components/motion/presets';
 import { Icon } from '@/components/ui/icon';
 import { CoinGlyph } from '@/components/ui/misc';
 import { Press } from '@/components/ui/press';
@@ -57,7 +59,12 @@ export default function Search() {
   const coinRow = (x: string, rank?: number) => {
     const p = prices[x];
     return (
-      <Press key={x} scale={1} onPress={() => openCoin(x)} pressedStyle={{ backgroundColor: c.s2 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, height: 56, paddingHorizontal: 8, borderRadius: 10 }}>
+      <Press
+        key={x}
+        scale={1}
+        onPress={() => openCoin(x)}
+        pressedStyle={{ backgroundColor: c.s2 }}
+        style={{ flexDirection: 'row', alignItems: 'center', gap: 12, height: 56, paddingHorizontal: 8, borderRadius: 10 }}>
         {rank != null && (
           <Txt mono size={12} color={c.acT} style={{ width: 16 }}>
             {rank}
@@ -124,18 +131,22 @@ export default function Search() {
               </View>
               <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                 {recent.map((r) => (
-                  <View key={r} style={{ flexDirection: 'row', alignItems: 'center', height: 34, borderRadius: 999, borderWidth: 1, borderColor: c.s4 }}>
+                  <Animated.View key={r} exiting={popOut} layout={rowLayout} style={{ flexDirection: 'row', alignItems: 'center', height: 34, borderRadius: 999, borderWidth: 1, borderColor: c.s4 }}>
                     <Press scale={1} onPress={() => setQ(r)} style={{ height: 34, paddingLeft: 12, paddingRight: 2, justifyContent: 'center' }}>
                       <Txt size={13} weight={500}>
                         {r}
                       </Txt>
                     </Press>
-                    <Press accessibilityLabel={`Remove ${r}`} scale={0.9} onPress={() => setWallet((s) => ({ recent: s.recent.filter((y) => y !== r) }))} style={{ width: 30, height: 34, alignItems: 'center', justifyContent: 'center' }}>
+                    <Press
+                      accessibilityLabel={`Remove ${r}`}
+                      scale={0.9}
+                      onPress={() => setWallet((s) => ({ recent: s.recent.filter((y) => y !== r) }))}
+                      style={{ width: 30, height: 34, alignItems: 'center', justifyContent: 'center' }}>
                       <Txt size={15} color={c.t3}>
                         ×
                       </Txt>
                     </Press>
-                  </View>
+                  </Animated.View>
                 ))}
               </View>
             </Appear>
@@ -152,7 +163,12 @@ export default function Search() {
             </Txt>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
               {FEATURES.slice(0, 6).map(([l, href]) => (
-                <Press key={l} scale={0.95} onPress={() => openFeature(l, href)} pressedStyle={{ backgroundColor: c.s2 }} style={{ width: '31.8%', flexGrow: 1, height: 44, borderRadius: 10, borderWidth: 1, borderColor: c.s4, alignItems: 'center', justifyContent: 'center' }}>
+                <Press
+                  key={l}
+                  scale={0.95}
+                  onPress={() => openFeature(l, href)}
+                  pressedStyle={{ backgroundColor: c.s2 }}
+                  style={{ width: '31.8%', flexGrow: 1, height: 44, borderRadius: 10, borderWidth: 1, borderColor: c.s4, alignItems: 'center', justifyContent: 'center' }}>
                   <Txt size={13} weight={500}>
                     {l}
                   </Txt>
@@ -176,7 +192,12 @@ export default function Search() {
             Features
           </Txt>
           {feats.map(([l, href]) => (
-            <Press key={l} scale={1} onPress={() => openFeature(l, href)} pressedStyle={{ backgroundColor: c.s2 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, height: 56, paddingHorizontal: 8, borderRadius: 10 }}>
+            <Press
+              key={l}
+              scale={1}
+              onPress={() => openFeature(l, href)}
+              pressedStyle={{ backgroundColor: c.s2 }}
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 12, height: 56, paddingHorizontal: 8, borderRadius: 10 }}>
               <Txt size={15} style={{ flex: 1 }}>
                 {l}
               </Txt>

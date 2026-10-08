@@ -129,7 +129,16 @@ export const KYC_QUEUE: KycApp[] = [
   { id: 'K-30417', name: 'Wanjiru Kamau', cc: 'KE', doc: 'Passport', ago: '9m', risk: 'Low', score: 18 },
   { id: 'K-30415', name: 'Hamza Qureshi', cc: 'PK', doc: 'CNIC', ago: '14m', risk: 'Medium', score: 46 },
   { id: 'K-30411', name: 'Nguyễn Minh Anh', cc: 'VN', doc: 'Citizen ID', ago: '22m', risk: 'Low', score: 9 },
-  { id: 'K-30409', name: 'Emre Yılmaz', cc: 'TR', doc: "Driver's licence", ago: '31m', risk: 'High', score: 78, flag: 'Partial name match on a sanctions watchlist. Escalate to compliance if unsure.' },
+  {
+    id: 'K-30409',
+    name: 'Emre Yılmaz',
+    cc: 'TR',
+    doc: "Driver's licence",
+    ago: '31m',
+    risk: 'High',
+    score: 78,
+    flag: 'Partial name match on a sanctions watchlist. Escalate to compliance if unsure.',
+  },
   { id: 'K-30402', name: 'Kofi Mensah', cc: 'GH', doc: 'Ghana Card', ago: '48m', risk: 'Low', score: 15 },
 ];
 

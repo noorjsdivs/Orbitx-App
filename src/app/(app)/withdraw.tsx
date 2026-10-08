@@ -88,7 +88,14 @@ export default function Withdraw() {
         </View>
       </Appear>
       <Appear i={2} style={{ marginHorizontal: 16, gap: 8 }}>
-        <FieldLabel right={<Txt size={13} color={c.t3}>Avbl {fmt(usdt, 2)} USDT</Txt>}>Amount</FieldLabel>
+        <FieldLabel
+          right={
+            <Txt size={13} color={c.t3}>
+              Avbl {fmt(usdt, 2)} USDT
+            </Txt>
+          }>
+          Amount
+        </FieldLabel>
         <Field
           value={w.amt}
           onChangeText={(v) => patch('withdraw', { amt: decimalInput(v) })}

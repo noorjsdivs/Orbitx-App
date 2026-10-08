@@ -147,7 +147,17 @@ function BookVisual({ active }: { active: boolean }) {
       </Frag>
       <Frag active={active} delay={450} style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}>
         {['Limit', 'Market', 'Stop-limit', 'Perps'].map((t, i) => (
-          <View key={t} style={{ height: 32, paddingHorizontal: 12, borderRadius: 999, justifyContent: 'center', backgroundColor: i === 0 ? c.s2 : 'transparent', borderWidth: i === 0 ? 0 : 1, borderColor: c.s3 }}>
+          <View
+            key={t}
+            style={{
+              height: 32,
+              paddingHorizontal: 12,
+              borderRadius: 999,
+              justifyContent: 'center',
+              backgroundColor: i === 0 ? c.s2 : 'transparent',
+              borderWidth: i === 0 ? 0 : 1,
+              borderColor: c.s3,
+            }}>
             <Txt size={12} weight={i === 0 ? 600 : 400} color={i === 0 ? c.t1 : c.t2}>
               {t}
             </Txt>

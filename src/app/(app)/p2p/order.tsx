@@ -2,10 +2,11 @@ import * as Clipboard from 'expo-clipboard';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import Animated, { cubicBezier } from 'react-native-reanimated';
+import Animated, { cubicBezier, LayoutAnimationConfig } from 'react-native-reanimated';
 
 import { Appear } from '@/components/layout/appear';
 import { Header, Screen } from '@/components/layout/screen';
+import { bubbleIn, fadeIn } from '@/components/motion/presets';
 import { Button } from '@/components/ui/button';
 import { StepBars } from '@/components/ui/controls';
 import { Field } from '@/components/ui/field';
@@ -48,11 +49,7 @@ export default function P2POrder() {
   }, [stage]);
 
   const titles = ['Pay the seller', 'Waiting for release', 'Order completed'];
-  const subs = [
-    'Transfer within the time limit, then tap “I have paid”.',
-    'The seller is confirming your payment. USDT is locked in escrow.',
-    `${fmt(usdt, 2)} USDT is now in your Funding account.`,
-  ];
+  const subs = ['Transfer within the time limit, then tap “I have paid”.', 'The seller is confirming your payment. USDT is locked in escrow.', `${fmt(usdt, 2)} USDT is now in your Funding account.`];
 
   return (
     <Screen gap={14} top={<Header title={p2p.side === 'buy' ? 'Buy USDT' : 'Sell USDT'} />}>
@@ -136,7 +133,7 @@ export default function P2POrder() {
         </Appear>
       )}
       {stage === 2 && (
-        <Appear i={2} style={{ marginHorizontal: 16 }}>
+        <Animated.View entering={fadeIn} style={{ marginHorizontal: 16 }}>
           <Card style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
             <Animated.View
               style={{
@@ -157,7 +154,7 @@ export default function P2POrder() {
               USDT released to your Funding account.
             </Txt>
           </Card>
-        </Appear>
+        </Animated.View>
       )}
       <Appear i={3} style={{ marginHorizontal: 16 }}>
         <Card>
@@ -173,18 +170,20 @@ export default function P2POrder() {
             </View>
           </View>
           <ScrollView ref={chatRef} style={{ maxHeight: 220 }} contentContainerStyle={{ gap: 8 }} onContentSizeChange={() => chatRef.current?.scrollToEnd({ animated: true })} nestedScrollEnabled>
-            {p2p.chat.map((x, i) => (
-              <View key={i} style={{ alignItems: x.me ? 'flex-end' : 'flex-start', gap: 3 }}>
-                <View style={{ maxWidth: '82%', paddingVertical: 9, paddingHorizontal: 12, borderRadius: 12, backgroundColor: x.me ? c.ac : c.s2 }}>
-                  <Txt size={13} lh={1.4} color={x.me ? c.onAc : c.t1}>
-                    {x.t}
+            <LayoutAnimationConfig skipEntering>
+              {p2p.chat.map((x, i) => (
+                <Animated.View key={i} entering={bubbleIn} style={{ alignItems: x.me ? 'flex-end' : 'flex-start', gap: 3 }}>
+                  <View style={{ maxWidth: '82%', paddingVertical: 9, paddingHorizontal: 12, borderRadius: 12, backgroundColor: x.me ? c.ac : c.s2 }}>
+                    <Txt size={13} lh={1.4} color={x.me ? c.onAc : c.t1}>
+                      {x.t}
+                    </Txt>
+                  </View>
+                  <Txt mono size={10} color={c.t4}>
+                    {x.time}
                   </Txt>
-                </View>
-                <Txt mono size={10} color={c.t4}>
-                  {x.time}
-                </Txt>
-              </View>
-            ))}
+                </Animated.View>
+              ))}
+            </LayoutAnimationConfig>
           </ScrollView>
           <View style={{ flexDirection: 'row', gap: 8 }}>
             <Field
@@ -232,7 +231,8 @@ export default function P2POrder() {
         )}
         {stage === 1 && (
           <View style={{ gap: 10 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.s1, borderWidth: 1, borderColor: c.line }}>
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.s1, borderWidth: 1, borderColor: c.line }}>
               <Spinner size={16} width={2} color={c.ac} duration={800} />
               <Txt size={13} color={c.t2} style={{ flex: 1 }}>
                 Waiting for the seller to confirm. USDT stays in escrow.

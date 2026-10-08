@@ -1,0 +1,9 @@
+ios
+android
+node_modules
+.expo
+dist
+docs
+*.zip
+package-lock.json
+README.md

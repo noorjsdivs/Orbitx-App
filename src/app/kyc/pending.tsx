@@ -26,12 +26,7 @@ export default function KycPending() {
   const [stage, setStage] = useState(0);
 
   useEffect(() => {
-    const t = [
-      setTimeout(() => setStage(1), 1300),
-      setTimeout(() => setStage(2), 2600),
-      setTimeout(() => setStage(3), 3800),
-      setTimeout(() => router.replace('/kyc/verified'), 4700),
-    ];
+    const t = [setTimeout(() => setStage(1), 1300), setTimeout(() => setStage(2), 2600), setTimeout(() => setStage(3), 3800), setTimeout(() => router.replace('/kyc/verified'), 4700)];
     return () => t.forEach(clearTimeout);
   }, [router]);
 
@@ -115,7 +110,12 @@ export default function KycPending() {
           </Card>
         </Appear>
         <Spacer />
-        <Button label="Go to Home" variant="secondary" h={52} style={{ alignSelf: 'stretch' }} onPress={() => {
+        <Button
+          label="Go to Home"
+          variant="secondary"
+          h={52}
+          style={{ alignSelf: 'stretch' }}
+          onPress={() => {
             enter('user', "We'll notify you when verification completes");
             // Review keeps running in the background; unlock limits when it lands.
             setTimeout(() => {

@@ -72,7 +72,9 @@ export default function Deposit() {
               <Txt size={14} weight={600} color={c.warn}>
                 MEMO required
               </Txt>
-              <Press onPress={() => copy(n.memo!, 'Memo copied')} style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 32, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, borderColor: c.s4 }}>
+              <Press
+                onPress={() => copy(n.memo!, 'Memo copied')}
+                style={{ flexDirection: 'row', alignItems: 'center', gap: 6, height: 32, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, borderColor: c.s4 }}>
                 <Txt mono size={13}>
                   {n.memo}
                 </Txt>

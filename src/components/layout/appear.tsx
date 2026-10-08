@@ -1,6 +1,6 @@
 import { createContext, use, useEffect, useState } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
-import Animated, { cubicBezier } from 'react-native-reanimated';
+import Animated, { cubicBezier, useReducedMotion } from 'react-native-reanimated';
 
 import { motion } from '@/theme/tokens';
 
@@ -32,7 +32,9 @@ export function useAppearOn() {
 
 /** Staggered fade-up (opacity 420ms · translateY 16px over 560ms, 60ms steps). */
 export function Appear({ i = 0, children, style, dy = 16 }: { i?: number; children: React.ReactNode; style?: StyleProp<ViewStyle>; dy?: number }) {
-  const on = use(AppearCtx);
+  const ctx = use(AppearCtx);
+  // With "Reduce Motion" on, content is simply shown — no fade or slide.
+  const on = useReducedMotion() || ctx;
   const d = 60 + i * 60;
   return (
     <Animated.View

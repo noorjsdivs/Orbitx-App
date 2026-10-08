@@ -69,7 +69,17 @@ export default function AdminKyc() {
                 scale={0.98}
                 pressedStyle={{ backgroundColor: c.s2 }}
                 onPress={() => (done ? toast(`${x.name} · approved this session`) : router.push({ pathname: '/sheets/kyc-review', params: { id: x.id } }))}
-                style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingHorizontal: 14, borderRadius: 10, backgroundColor: c.s1, borderWidth: 1, borderColor: c.line }}>
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                  paddingVertical: 12,
+                  paddingHorizontal: 14,
+                  borderRadius: 10,
+                  backgroundColor: c.s1,
+                  borderWidth: 1,
+                  borderColor: c.line,
+                }}>
                 <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: c.s2, alignItems: 'center', justifyContent: 'center' }}>
                   <Txt size={13} weight={600} color={c.t2}>
                     {initials(x.name)}

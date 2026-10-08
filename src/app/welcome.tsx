@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SocialButtons } from '@/components/auth-buttons';
 import { Appear, AppearProvider } from '@/components/layout/appear';
+import { FlashPrice } from '@/components/motion/flash-price';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
 import { CoinGlyph } from '@/components/ui/misc';
@@ -32,9 +33,9 @@ function Ticker() {
                 /USDT
               </Txt>
             </Txt>
-            <Txt size={15} weight={500} color={q.dir < 0 ? c.dn : c.t1}>
+            <FlashPrice value={q.p} dir={q.dir} size={15} weight={500} color={q.dir < 0 ? c.dn : c.t1}>
               {fmt(q.p, COINS[k].dp)}
-            </Txt>
+            </FlashPrice>
             <Txt size={13} weight={600} color={q.c >= 0 ? c.up : c.dn} align="right" style={{ width: 64 }}>
               {pct(q.c)}
             </Txt>

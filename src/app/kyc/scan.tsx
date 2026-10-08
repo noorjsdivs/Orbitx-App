@@ -147,7 +147,8 @@ export default function KycScan() {
         onPress={() => {
           setStage(0);
           setRun((r) => r + 1);
-        }} style={{ height: 44, alignItems: 'center', justifyContent: 'center', marginTop: -6 }}>
+        }}
+        style={{ height: 44, alignItems: 'center', justifyContent: 'center', marginTop: -6 }}>
         <Txt size={14} color={c.t2}>
           Retake
         </Txt>

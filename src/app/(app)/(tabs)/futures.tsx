@@ -1,9 +1,12 @@
 import Slider from '@react-native-community/slider';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import Animated, { LayoutAnimationConfig, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 import { Appear } from '@/components/layout/appear';
 import { Header, Screen } from '@/components/layout/screen';
+import { FlashPrice } from '@/components/motion/flash-price';
+import { fadeIn, fadeOut, rowEnter, rowExit, rowLayout } from '@/components/motion/presets';
 import { Button } from '@/components/ui/button';
 import { Chip, ChipRow, Seg, UnderlineTabs } from '@/components/ui/controls';
 import { Field } from '@/components/ui/field';
@@ -41,6 +44,12 @@ export default function Futures() {
   const [type, setType] = useState<'market' | 'limit'>('market');
   const [size, setSize] = useState('');
   const [limit, setLimit] = useState('');
+
+  const levPop = useSharedValue(1);
+  useEffect(() => {
+    levPop.set(withSequence(withTiming(1.12, { duration: 80 }), withSpring(1, { damping: 12, stiffness: 320 })));
+  }, [lev, levPop]);
+  const levStyle = useAnimatedStyle(() => ({ transform: [{ scale: levPop.value }] }));
 
   const fp = btc.p;
   const sz = num(size);
@@ -102,9 +111,9 @@ export default function Futures() {
       }>
       <Appear i={0} style={{ marginHorizontal: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end' }}>
         <View style={{ gap: 2 }}>
-          <Txt size={30} weight={600} ls={-0.03} color={btc.dir < 0 ? c.dn : c.t1}>
+          <FlashPrice value={fp} dir={btc.dir} size={30} weight={600} ls={-0.03} color={btc.dir < 0 ? c.dn : c.t1}>
             {fmt(fp, 2)}
-          </Txt>
+          </FlashPrice>
           <Txt size={13} weight={600} color={btc.c >= 0 ? c.up : c.dn}>
             {pct(btc.c)}
           </Txt>
@@ -132,10 +141,12 @@ export default function Futures() {
                 onChange={setMode}
               />
             </View>
-            <View style={{ height: 44, minWidth: 72, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: c.s4, alignItems: 'center', justifyContent: 'center' }}>
-              <Txt size={16} weight={700} color={c.acT}>
-                {lev}x
-              </Txt>
+            <View style={{ height: 44, minWidth: 72, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: lev > 20 ? c.warn : c.s4, alignItems: 'center', justifyContent: 'center' }}>
+              <Animated.View style={levStyle}>
+                <Txt size={16} weight={700} color={lev > 20 ? c.warn : c.acT}>
+                  {lev}x
+                </Txt>
+              </Animated.View>
             </View>
           </View>
           <View style={{ gap: 4 }}>
@@ -165,49 +176,55 @@ export default function Futures() {
             </View>
           </View>
           {lev > 20 && <Notice>{`High leverage. A ${((100 / lev) * 0.96).toFixed(1)}% move against you can liquidate this position.`}</Notice>}
-          <UnderlineTabs
-            tabs={[
-              { value: 'market', label: 'Market' },
-              { value: 'limit', label: 'Limit' },
-            ]}
-            value={type}
-            onChange={(t) => {
-              setType(t);
-              setLimit(fp.toFixed(1));
-            }}
-          />
-          {type === 'limit' && <Field value={limit} onChangeText={(v) => setLimit(decimalInput(v))} placeholder="Limit price (USDT)" keyboardType="decimal-pad" />}
-          <Field value={size} onChangeText={(v) => setSize(decimalInput(v))} placeholder="Size (USDT)" keyboardType="decimal-pad" />
-          <ChipRow>
-            {[10, 25, 50, 100].map((v) => (
-              <Chip
-                key={v}
-                label={`${v}%`}
-                onPress={() => {
-                  haptic.tap();
-                  setSize(String(Math.floor((((futAvail * v) / 100) * lev * 0.98))));
-                }}
-              />
-            ))}
-          </ChipRow>
-          <Rows
-            rows={[
-              { k: 'Margin required', v: `${fmt(marg, 2)} USDT` },
-              { k: 'Est. liq. price · long', v: sz > 0 ? fmt(liqL, 2) : '--', c: c.warn },
-              { k: 'Est. liq. price · short', v: sz > 0 ? fmt(liqS, 2) : '--', c: c.warn },
-              { k: 'Fee (0.05% taker)', v: `${fmt(fee, 2)} USDT` },
-              { k: 'Available margin', v: `${fmt(futAvail, 2)} USDT` },
-            ]}
-          />
-          {!!err && <Notice>{err}</Notice>}
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <View style={{ flex: 1 }}>
-              <Button variant="buy" label="Open long" onPress={open('long')} />
+          <Animated.View layout={rowLayout} style={{ gap: 12 }}>
+            <UnderlineTabs
+              tabs={[
+                { value: 'market', label: 'Market' },
+                { value: 'limit', label: 'Limit' },
+              ]}
+              value={type}
+              onChange={(t) => {
+                setType(t);
+                setLimit(fp.toFixed(1));
+              }}
+            />
+            {type === 'limit' && (
+              <Animated.View entering={fadeIn} exiting={fadeOut}>
+                <Field value={limit} onChangeText={(v) => setLimit(decimalInput(v))} placeholder="Limit price (USDT)" keyboardType="decimal-pad" />
+              </Animated.View>
+            )}
+            <Field value={size} onChangeText={(v) => setSize(decimalInput(v))} placeholder="Size (USDT)" keyboardType="decimal-pad" />
+            <ChipRow>
+              {[10, 25, 50, 100].map((v) => (
+                <Chip
+                  key={v}
+                  label={`${v}%`}
+                  onPress={() => {
+                    haptic.tap();
+                    setSize(String(Math.floor(((futAvail * v) / 100) * lev * 0.98)));
+                  }}
+                />
+              ))}
+            </ChipRow>
+            <Rows
+              rows={[
+                { k: 'Margin required', v: `${fmt(marg, 2)} USDT` },
+                { k: 'Est. liq. price · long', v: sz > 0 ? fmt(liqL, 2) : '--', c: c.warn },
+                { k: 'Est. liq. price · short', v: sz > 0 ? fmt(liqS, 2) : '--', c: c.warn },
+                { k: 'Fee (0.05% taker)', v: `${fmt(fee, 2)} USDT` },
+                { k: 'Available margin', v: `${fmt(futAvail, 2)} USDT` },
+              ]}
+            />
+            {!!err && <Notice>{err}</Notice>}
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <Button variant="buy" label="Open long" onPress={open('long')} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Button variant="sell" label="Open short" onPress={open('short')} />
+              </View>
             </View>
-            <View style={{ flex: 1 }}>
-              <Button variant="sell" label="Open short" onPress={open('short')} />
-            </View>
-          </View>
+          </Animated.View>
         </Card>
       </Appear>
 
@@ -228,75 +245,81 @@ export default function Futures() {
           </View>
         </Appear>
       )}
-      {positions.map((p) => {
-        const s = positionStats(p, prices);
-        const sc = p.side === 'long' ? c.up : c.dn;
-        const pc = s.pnl >= 0 ? c.up : c.dn;
-        const cell = (k: string, v: string, right?: boolean, col?: string) => (
-          <View key={k} style={{ width: '33.33%', gap: 2, alignItems: right ? 'flex-end' : 'flex-start', paddingVertical: 5 }}>
-            <Txt size={12} color={c.t3}>
-              {k}
-            </Txt>
-            <Txt size={12} color={col}>
-              {v}
-            </Txt>
-          </View>
-        );
-        return (
-          <Appear key={p.id} i={3} style={{ marginHorizontal: 16 }}>
-            <Card>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Txt size={15} weight={600}>
-                  {p.sym}USDT
-                </Txt>
-                <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: tint(sc, 14) }}>
-                  <Txt size={11} weight={600} color={sc}>
-                    {p.side === 'long' ? 'Long' : 'Short'} {p.lev}x · {p.mode}
-                  </Txt>
-                </View>
-                <View style={{ flex: 1 }} />
-                <View style={{ alignItems: 'flex-end' }}>
-                  <Txt size={15} weight={600} color={pc}>
-                    {s.pnl >= 0 ? '+' : ''}
-                    {fmt(s.pnl, 2)} USDT
-                  </Txt>
-                  <Txt size={12} color={pc}>
-                    ROE {pct(s.roe)}
-                  </Txt>
-                </View>
-              </View>
-              <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                {cell('Size', `${fmt(p.size, 4)} ${p.sym}`)}
-                {cell('Entry', fmt(p.entry, 2))}
-                {cell('Mark', fmt(s.mark, 2), true)}
-                {cell('Liq. price', fmt(s.liq, 2), false, c.warn)}
-                {cell('Margin', `${fmt(s.im, 2)} USDT`)}
-                {cell('Funding', '+0.0100%', true)}
-              </View>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                <View style={{ flex: 1 }}>
-                  <Button variant="secondary" h={38} size={13} label="TP / SL" onPress={() => toast('Take-profit / stop-loss editor')} />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Button
-                    variant="secondary"
-                    h={38}
-                    size={13}
-                    label="Close position"
-                    onPress={() => {
-                      setWallet((w) => ({ positions: w.positions.filter((x) => x.id !== p.id), futUsdt: w.futUsdt + s.pnl }));
-                      haptic.success();
-                      toast(`Position closed · realized ${s.pnl >= 0 ? '+' : ''}${fmt(s.pnl, 2)} USDT`);
-                    }}
-                  />
-                </View>
-              </View>
-            </Card>
-          </Appear>
-        );
-      })}
+      <LayoutAnimationConfig skipEntering>
+        {positions.map((p) => {
+          const s = positionStats(p, prices);
+          const sc = p.side === 'long' ? c.up : c.dn;
+          const pc = s.pnl >= 0 ? c.up : c.dn;
+          const cell = (k: string, v: string, right?: boolean, col?: string) => (
+            <View key={k} style={{ width: '33.33%', gap: 2, alignItems: right ? 'flex-end' : 'flex-start', paddingVertical: 5 }}>
+              <Txt size={12} color={c.t3}>
+                {k}
+              </Txt>
+              <Txt size={12} color={col}>
+                {v}
+              </Txt>
+            </View>
+          );
+          return (
+            <Animated.View key={p.id} entering={rowEnter} exiting={rowExit} layout={rowLayout}>
+              <Appear i={3} style={{ marginHorizontal: 16 }}>
+                <Card>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                    <Txt size={15} weight={600}>
+                      {p.sym}USDT
+                    </Txt>
+                    <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: tint(sc, 14) }}>
+                      <Txt size={11} weight={600} color={sc}>
+                        {p.side === 'long' ? 'Long' : 'Short'} {p.lev}x · {p.mode}
+                      </Txt>
+                    </View>
+                    <View style={{ flex: 1 }} />
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Txt size={15} weight={600} color={pc}>
+                        {s.pnl >= 0 ? '+' : ''}
+                        {fmt(s.pnl, 2)} USDT
+                      </Txt>
+                      <Txt size={12} color={pc}>
+                        ROE {pct(s.roe)}
+                      </Txt>
+                    </View>
+                  </View>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                    {cell('Size', `${fmt(p.size, 4)} ${p.sym}`)}
+                    {cell('Entry', fmt(p.entry, 2))}
+                    {cell('Mark', fmt(s.mark, 2), true)}
+                    {cell('Liq. price', fmt(s.liq, 2), false, c.warn)}
+                    {cell('Margin', `${fmt(s.im, 2)} USDT`)}
+                    {cell('Funding', '+0.0100%', true)}
+                  </View>
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <View style={{ flex: 1 }}>
+                      <Button variant="secondary" h={38} size={13} label="TP / SL" onPress={() => toast('Take-profit / stop-loss editor')} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Button
+                        variant="secondary"
+                        h={38}
+                        size={13}
+                        label="Close position"
+                        onPress={() => {
+                          setWallet((w) => ({ positions: w.positions.filter((x) => x.id !== p.id), futUsdt: w.futUsdt + s.pnl }));
+                          haptic.success();
+                          toast(`Position closed · realized ${s.pnl >= 0 ? '+' : ''}${fmt(s.pnl, 2)} USDT`);
+                        }}
+                      />
+                    </View>
+                  </View>
+                </Card>
+              </Appear>
+            </Animated.View>
+          );
+        })}
+      </LayoutAnimationConfig>
       <Appear i={4} style={{ marginHorizontal: 16 }}>
-        <Footnote>Futures are high risk. Leverage amplifies gains and losses, and you can lose your entire margin.</Footnote>
+        <Animated.View layout={rowLayout}>
+          <Footnote>Futures are high risk. Leverage amplifies gains and losses, and you can lose your entire margin.</Footnote>
+        </Animated.View>
       </Appear>
     </Screen>
   );

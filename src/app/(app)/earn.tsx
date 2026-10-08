@@ -1,8 +1,11 @@
 import { useRouter } from 'expo-router';
 import { View } from 'react-native';
+import Animated, { LayoutAnimationConfig } from 'react-native-reanimated';
 
 import { Appear } from '@/components/layout/appear';
 import { Header, IconButton, Screen } from '@/components/layout/screen';
+import { useTween } from '@/components/motion/animated-number';
+import { rowEnter, rowLayout } from '@/components/motion/presets';
 import { Button } from '@/components/ui/button';
 import { Seg } from '@/components/ui/controls';
 import { Card, CoinGlyph, Footnote } from '@/components/ui/misc';
@@ -19,6 +22,7 @@ export default function Earn() {
   const tab = useDrafts((s) => s.earn.tab);
   const patch = useDrafts((s) => s.patch);
   const { earnTotal, earn } = usePortfolio();
+  const total = useTween(earnTotal, { from: 0, duration: 900 });
 
   return (
     <Screen gap={14} top={<Header title="Earn" right={<IconButton name="history" label="Earn history" onPress={() => router.push('/orders')} />} />}>
@@ -29,7 +33,7 @@ export default function Earn() {
           </Txt>
           <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
             <Txt size={30} weight={600} ls={-0.03}>
-              {fmt(earnTotal, 2)}
+              {fmt(total, 2)}
             </Txt>
             <Txt size={14} color={c.t2}>
               USDT
@@ -63,7 +67,19 @@ export default function Earn() {
       </Appear>
       {EARN_PRODUCTS[tab].map((p) => (
         <Appear key={p[1]} i={2} style={{ marginHorizontal: 16 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 12, paddingRight: 12, paddingLeft: 14, borderRadius: 12, backgroundColor: c.s1, borderWidth: 1, borderColor: c.line }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 12,
+              paddingVertical: 12,
+              paddingRight: 12,
+              paddingLeft: 14,
+              borderRadius: 12,
+              backgroundColor: c.s1,
+              borderWidth: 1,
+              borderColor: c.line,
+            }}>
             <CoinGlyph sym={p[0]} size={36} />
             <View style={{ flex: 1, minWidth: 0, gap: 3 }}>
               <Txt size={15} weight={600}>
@@ -99,34 +115,38 @@ export default function Earn() {
           My positions
         </Txt>
       </Appear>
-      {earn.map((e) => (
-        <Appear key={e.id} i={3} style={{ marginHorizontal: 16 }}>
-          <Card>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <CoinGlyph sym={e.coin} />
-              <View style={{ flex: 1, gap: 2 }}>
-                <Txt size={15} weight={600}>
-                  {e.name}
-                </Txt>
-                <Txt size={12} color={c.t3}>
-                  {e.term}
-                </Txt>
-              </View>
-              <Txt size={15} weight={600} color={c.up}>
-                {e.apr}
-              </Txt>
-            </View>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Txt size={12} color={c.t3}>
-                Holding <Txt size={12}>{`${fmt(e.amt, e.coin === 'USDT' ? 2 : 4)} ${e.coin}`}</Txt>
-              </Txt>
-              <Txt size={12} color={c.t3}>
-                {e.k2} <Txt size={12}>{e.v2}</Txt>
-              </Txt>
-            </View>
-          </Card>
-        </Appear>
-      ))}
+      <LayoutAnimationConfig skipEntering>
+        {earn.map((e) => (
+          <Animated.View key={e.id} entering={rowEnter} layout={rowLayout}>
+            <Appear i={3} style={{ marginHorizontal: 16 }}>
+              <Card>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <CoinGlyph sym={e.coin} />
+                  <View style={{ flex: 1, gap: 2 }}>
+                    <Txt size={15} weight={600}>
+                      {e.name}
+                    </Txt>
+                    <Txt size={12} color={c.t3}>
+                      {e.term}
+                    </Txt>
+                  </View>
+                  <Txt size={15} weight={600} color={c.up}>
+                    {e.apr}
+                  </Txt>
+                </View>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                  <Txt size={12} color={c.t3}>
+                    Holding <Txt size={12}>{`${fmt(e.amt, e.coin === 'USDT' ? 2 : 4)} ${e.coin}`}</Txt>
+                  </Txt>
+                  <Txt size={12} color={c.t3}>
+                    {e.k2} <Txt size={12}>{e.v2}</Txt>
+                  </Txt>
+                </View>
+              </Card>
+            </Appear>
+          </Animated.View>
+        ))}
+      </LayoutAnimationConfig>
       <Appear i={4} style={{ marginHorizontal: 16 }}>
         <Footnote>{"APR is an estimate, not a guaranteed return, and can change daily. Locked products can't be redeemed early without forfeiting rewards."}</Footnote>
       </Appear>

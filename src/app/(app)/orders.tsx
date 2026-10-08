@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { Appear } from '@/components/layout/appear';
 import { Header, Screen } from '@/components/layout/screen';
+import { rowExit, rowLayout } from '@/components/motion/presets';
 import { Button } from '@/components/ui/button';
 import { Chip, ChipRow, UnderlineTabs } from '@/components/ui/controls';
 import { Card } from '@/components/ui/misc';
@@ -66,53 +68,55 @@ export default function Orders() {
         const status = tab === 'open' ? 'Open · 0%' : tab === 'filled' ? 'Filled' : 'Canceled';
         const stC = tab === 'open' ? c.t1 : tab === 'filled' ? c.up : c.t3;
         return (
-          <Appear key={x.id} i={1} style={{ marginHorizontal: 16 }}>
-            <Card>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                <Txt size={15} weight={600}>
-                  {x.sym}/USDT
-                </Txt>
-                <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: tint(sc, 14) }}>
-                  <Txt size={11} weight={600} color={sc}>
-                    {x.type} / {x.side === 'buy' ? 'Buy' : 'Sell'}
+          <Animated.View key={`${tab}-${x.id}`} exiting={rowExit} layout={rowLayout}>
+            <Appear i={1} style={{ marginHorizontal: 16 }}>
+              <Card>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <Txt size={15} weight={600}>
+                    {x.sym}/USDT
                   </Txt>
-                </View>
-                <View style={{ flex: 1 }} />
-                <Txt mono size={11} color={c.t3}>
-                  {x.time}
-                </Txt>
-              </View>
-              <View style={{ flexDirection: 'row' }}>
-                {[
-                  ['Amount', `${fmt(x.amt, amountDp(prices[x.sym]?.p ?? 1))} ${x.sym}`, c.t1],
-                  ['Price', fmt(x.price, COINS[x.sym]?.dp ?? 2), c.t1],
-                  ['Status', status, stC],
-                ].map(([k, v, col], i) => (
-                  <View key={k} style={{ flex: 1, gap: 2, alignItems: i === 2 ? 'flex-end' : 'flex-start' }}>
-                    <Txt size={12} color={c.t3}>
-                      {k}
-                    </Txt>
-                    <Txt size={12} color={col}>
-                      {v}
+                  <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: tint(sc, 14) }}>
+                    <Txt size={11} weight={600} color={sc}>
+                      {x.type} / {x.side === 'buy' ? 'Buy' : 'Sell'}
                     </Txt>
                   </View>
-                ))}
-              </View>
-              {tab === 'open' && (
-                <Button
-                  variant="secondary"
-                  h={38}
-                  size={13}
-                  label="Cancel order"
-                  onPress={() => {
-                    cancelOrder(x.id, hms());
-                    haptic.impact();
-                    toast(`Order canceled · ${x.sym}/USDT`);
-                  }}
-                />
-              )}
-            </Card>
-          </Appear>
+                  <View style={{ flex: 1 }} />
+                  <Txt mono size={11} color={c.t3}>
+                    {x.time}
+                  </Txt>
+                </View>
+                <View style={{ flexDirection: 'row' }}>
+                  {[
+                    ['Amount', `${fmt(x.amt, amountDp(prices[x.sym]?.p ?? 1))} ${x.sym}`, c.t1],
+                    ['Price', fmt(x.price, COINS[x.sym]?.dp ?? 2), c.t1],
+                    ['Status', status, stC],
+                  ].map(([k, v, col], i) => (
+                    <View key={k} style={{ flex: 1, gap: 2, alignItems: i === 2 ? 'flex-end' : 'flex-start' }}>
+                      <Txt size={12} color={c.t3}>
+                        {k}
+                      </Txt>
+                      <Txt size={12} color={col}>
+                        {v}
+                      </Txt>
+                    </View>
+                  ))}
+                </View>
+                {tab === 'open' && (
+                  <Button
+                    variant="secondary"
+                    h={38}
+                    size={13}
+                    label="Cancel order"
+                    onPress={() => {
+                      cancelOrder(x.id, hms());
+                      haptic.impact();
+                      toast(`Order canceled · ${x.sym}/USDT`);
+                    }}
+                  />
+                )}
+              </Card>
+            </Appear>
+          </Animated.View>
         );
       })}
     </Screen>

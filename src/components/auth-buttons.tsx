@@ -5,7 +5,17 @@ import { AppleLogo, GoogleLogo } from '@/components/ui/icon';
 import { Spinner } from '@/components/ui/spinner';
 
 /** Apple + Google sign-in buttons with per-provider loading state. */
-export function SocialButtons({ busy, onPress, order = ['apple', 'google'], h = 50 }: { busy: null | 'google' | 'apple'; onPress: (p: 'google' | 'apple') => void; order?: ('google' | 'apple')[]; h?: number }) {
+export function SocialButtons({
+  busy,
+  onPress,
+  order = ['apple', 'google'],
+  h = 50,
+}: {
+  busy: null | 'google' | 'apple';
+  onPress: (p: 'google' | 'apple') => void;
+  order?: ('google' | 'apple')[];
+  h?: number;
+}) {
   return (
     <View style={{ flexDirection: 'row', gap: 10 }}>
       {order.map((p) => (

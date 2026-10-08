@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { View } from 'react-native';
 
+import { tabTransition } from '@/components/motion/presets';
 import { GlassBar, GlassBarItem } from '@/components/navigation/glass-bar';
 import { AdminHeader } from '@/features/admin-ui';
 import { useColors } from '@/hooks/use-theme';
@@ -27,7 +28,7 @@ export default function AdminLayout() {
   return (
     <View style={{ flex: 1, backgroundColor: c.bg }}>
       <Tabs
-        screenOptions={{ headerShown: false, animation: 'fade', sceneStyle: { backgroundColor: c.bg } }}
+        screenOptions={{ headerShown: false, sceneStyle: { backgroundColor: c.bg }, ...tabTransition }}
         tabBar={({ state, navigation }) => {
           const active = state.routes[state.index]?.name;
           const tab = TABS.find((t) => t.name === active) ?? TABS[0];

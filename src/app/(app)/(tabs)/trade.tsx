@@ -1,12 +1,15 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
+import Animated, { LayoutAnimationConfig } from 'react-native-reanimated';
 
 import { AreaChart, CandleChart } from '@/components/charts';
 import { Appear } from '@/components/layout/appear';
+import { FlashPrice } from '@/components/motion/flash-price';
+import { fadeIn, rowEnter, rowExit, rowLayout } from '@/components/motion/presets';
 import { IconButton, Screen } from '@/components/layout/screen';
 import { Button } from '@/components/ui/button';
-import { Checkbox, Chip, ChipRow, PillToggle, Seg } from '@/components/ui/controls';
+import { Checkbox, Chip, ChipRow, PillToggle, Seg, UnderlineTabs } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/icon';
 import { CoinGlyph, Notice, Skel } from '@/components/ui/misc';
 import { Press } from '@/components/ui/press';
@@ -48,8 +51,16 @@ function ModeHeader() {
       <View style={{ flexDirection: 'row' }}>
         {tab('Spot', true)}
         {tab('Futures', false, () => goTab('futures'))}
-        {tab('Convert', false, guard('Sign up to convert', () => router.push('/convert')))}
-        {tab('P2P', false, guard('Sign up to buy with P2P', () => router.push('/p2p')))}
+        {tab(
+          'Convert',
+          false,
+          guard('Sign up to convert', () => router.push('/convert')),
+        )}
+        {tab(
+          'P2P',
+          false,
+          guard('Sign up to buy with P2P', () => router.push('/p2p')),
+        )}
       </View>
       <PillToggle<TradeMode>
         h={30}
@@ -132,9 +143,9 @@ function ChartBlock() {
     <View>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', paddingHorizontal: 16, paddingBottom: 8, gap: 12 }}>
         <View style={{ gap: 2 }}>
-          <Txt size={26} weight={600} ls={-0.02} color={dirCol}>
+          <FlashPrice value={live} dir={q.dir} size={26} weight={600} ls={-0.02} color={dirCol} containerStyle={{ alignSelf: 'flex-start' }}>
             {fmt(live, co.dp)}
-          </Txt>
+          </FlashPrice>
           <Txt size={12} color={c.t2}>
             ≈ ${fmt(live, co.dp)}
           </Txt>
@@ -160,7 +171,9 @@ function ChartBlock() {
         </Txt>
       </View>
       <View style={{ marginTop: 4, marginHorizontal: 16 }}>
-        <CandleChart candles={candles} live={live} dirUp={q.dir >= 0} axisDp={axisDp} />
+        <Animated.View key={sym + tf} entering={fadeIn}>
+          <CandleChart candles={candles} live={live} dirUp={q.dir >= 0} axisDp={axisDp} />
+        </Animated.View>
       </View>
     </View>
   );
@@ -227,7 +240,11 @@ function TicketPanel() {
             ['stop', 'Stop-limit'],
           ] as [OrderType, string][]
         ).map(([k, l]) => (
-          <Press key={k} scale={1} onPress={() => patch('spot', { otype: k, priceIn: (parseFloat(spot.priceIn) || T.live).toFixed(dp) })} style={{ height: 40, paddingHorizontal: 6, justifyContent: 'center' }}>
+          <Press
+            key={k}
+            scale={1}
+            onPress={() => patch('spot', { otype: k, priceIn: (parseFloat(spot.priceIn) || T.live).toFixed(dp) })}
+            style={{ height: 40, paddingHorizontal: 6, justifyContent: 'center' }}>
             <Txt size={13} weight={500} color={spot.otype === k ? c.t1 : c.t3} numberOfLines={1}>
               {l}
             </Txt>
@@ -325,7 +342,19 @@ function OrderBook() {
         patch('spot', { priceIn: x.p.toFixed(co.dp), otype: otype === 'market' ? 'limit' : otype });
       }}
       style={{ height: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-      <View style={{ position: 'absolute', right: 0, top: 1, bottom: 1, width: `${(x.cum / book.maxCum) * 100}%`, backgroundColor: tint(col, 12) }} />
+      <Animated.View
+        style={{
+          position: 'absolute',
+          right: 0,
+          top: 1,
+          bottom: 1,
+          width: (x.cum / book.maxCum) * 142,
+          backgroundColor: tint(col, 12),
+          transitionProperty: 'width',
+          transitionDuration: 450,
+          transitionTimingFunction: 'ease-out',
+        }}
+      />
       <Txt size={11.5} color={col}>
         {fmt(x.p, co.dp)}
       </Txt>
@@ -346,9 +375,9 @@ function OrderBook() {
       </View>
       {book.asks.map((x, i) => row(x, c.dn, 'a' + i))}
       <View style={{ paddingVertical: 6 }}>
-        <Txt size={16} weight={600} color={dirCol} numberOfLines={1}>
+        <FlashPrice value={q.p} dir={q.dir} size={16} weight={600} color={dirCol} numberOfLines={1} containerStyle={{ alignSelf: 'flex-start' }}>
           {fmt(q.p, co.dp)}
-        </Txt>
+        </FlashPrice>
         <Txt size={11} color={c.t3} numberOfLines={1}>
           ≈ ${fmt(q.p, co.dp)}
         </Txt>
@@ -380,7 +409,12 @@ function OrderBook() {
               ['asks', c.dn, c.dn],
             ] as [BookView, string, string][]
           ).map(([k, a, b]) => (
-            <Press key={k} accessibilityLabel={`Book view ${k}`} scale={0.9} onPress={() => setView(k)} style={{ width: 28, height: 40, alignItems: 'center', justifyContent: 'center', gap: 2, opacity: view === k ? 1 : 0.4 }}>
+            <Press
+              key={k}
+              accessibilityLabel={`Book view ${k}`}
+              scale={0.9}
+              onPress={() => setView(k)}
+              style={{ width: 28, height: 40, alignItems: 'center', justifyContent: 'center', gap: 2, opacity: view === k ? 1 : 0.4 }}>
               <View style={{ width: 14, height: 6, borderRadius: 1, backgroundColor: a }} />
               <View style={{ width: 14, height: 6, borderRadius: 1, backgroundColor: b }} />
             </Press>
@@ -405,31 +439,33 @@ function OrdersPanel() {
   const visible = guest ? [] : hideOther ? orders.filter((o) => o.sym === sym) : orders;
   const st = useListStatus(visible.length);
 
-  const tabBtn = (k: 'open' | 'hold', label: string) => (
-    <Press key={k} scale={1} onPress={() => setTab(k)} style={{ height: 44, paddingHorizontal: 12, justifyContent: 'center', borderBottomWidth: 2, borderBottomColor: tab === k ? c.ac : 'transparent' }}>
-      <Txt size={14} weight={500} color={tab === k ? c.t1 : c.t3}>
-        {label}
-      </Txt>
-    </Press>
-  );
-
   return (
     <View style={{ marginTop: 16, borderTopWidth: 8, borderTopColor: c.s1 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 4, paddingRight: 8, borderBottomWidth: 1, borderBottomColor: c.hair }}>
-        <View style={{ flexDirection: 'row' }}>
-          {tabBtn('open', `Open orders (${guest ? 0 : orders.length})`)}
-          {tabBtn('hold', 'Holdings')}
-        </View>
-        <Press scale={1} onPress={guard('Sign up to see your orders', () => router.push('/orders'))} style={{ height: 44, paddingHorizontal: 8, justifyContent: 'center' }}>
-          <Txt size={13} color={c.t2}>
-            History
-          </Txt>
-        </Press>
-      </View>
+      <UnderlineTabs<'open' | 'hold'>
+        style={{ paddingLeft: 4 }}
+        tabs={[
+          { value: 'open', label: `Open orders (${guest ? 0 : orders.length})` },
+          { value: 'hold', label: 'Holdings' },
+        ]}
+        value={tab}
+        onChange={setTab}
+        right={
+          <Press scale={1} onPress={guard('Sign up to see your orders', () => router.push('/orders'))} style={{ height: 44, paddingHorizontal: 8, justifyContent: 'center' }}>
+            <Txt size={13} color={c.t2}>
+              History
+            </Txt>
+          </Press>
+        }
+      />
       {tab === 'open' ? (
         <View>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingLeft: 8, paddingRight: 16 }}>
-            <Press scale={1} onPress={() => setHideOther(!hideOther)} accessibilityRole="checkbox" accessibilityState={{ checked: hideOther }} style={{ height: 44, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 8 }}>
+            <Press
+              scale={1}
+              onPress={() => setHideOther(!hideOther)}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: hideOther }}
+              style={{ height: 44, flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 8 }}>
               <Checkbox checked={hideOther} />
               <Txt size={12} color={c.t2}>
                 Hide other pairs
@@ -480,59 +516,66 @@ function OrdersPanel() {
               </Txt>
             </View>
           )}
-          {st === 'ok' &&
-            visible.map((o) => {
-              const ddp = COINS[o.sym].dp;
-              const xad = amountDp(prices[o.sym].p);
-              const sc = o.side === 'buy' ? c.up : c.dn;
-              return (
-                <View key={o.id} style={{ paddingTop: 8, paddingBottom: 12, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: c.hair, gap: 6 }}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                      <Txt size={15} weight={600}>
-                        {o.sym}/USDT
-                      </Txt>
-                      <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, backgroundColor: tint(sc, 14) }}>
-                        <Txt size={11} weight={600} color={sc}>
-                          {o.type} / {o.side === 'buy' ? 'Buy' : 'Sell'}
+          <LayoutAnimationConfig skipEntering>
+            {st === 'ok' &&
+              visible.map((o) => {
+                const ddp = COINS[o.sym].dp;
+                const xad = amountDp(prices[o.sym].p);
+                const sc = o.side === 'buy' ? c.up : c.dn;
+                return (
+                  <Animated.View
+                    key={o.id}
+                    entering={rowEnter}
+                    exiting={rowExit}
+                    layout={rowLayout}
+                    style={{ paddingTop: 8, paddingBottom: 12, paddingHorizontal: 16, borderBottomWidth: 1, borderBottomColor: c.hair, gap: 6 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Txt size={15} weight={600}>
+                          {o.sym}/USDT
                         </Txt>
+                        <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, backgroundColor: tint(sc, 14) }}>
+                          <Txt size={11} weight={600} color={sc}>
+                            {o.type} / {o.side === 'buy' ? 'Buy' : 'Sell'}
+                          </Txt>
+                        </View>
                       </View>
+                      <Press
+                        scale={0.95}
+                        onPress={() => {
+                          cancelOrder(o.id, hms());
+                          haptic.impact();
+                          toast(`Order canceled · ${o.sym}/USDT ${o.type} ${o.side}`);
+                        }}
+                        style={{ height: 44, justifyContent: 'center' }}>
+                        <View style={{ height: 30, paddingHorizontal: 12, borderRadius: 8, backgroundColor: c.s2, justifyContent: 'center' }}>
+                          <Txt size={12} weight={600}>
+                            Cancel
+                          </Txt>
+                        </View>
+                      </Press>
                     </View>
-                    <Press
-                      scale={0.95}
-                      onPress={() => {
-                        cancelOrder(o.id, hms());
-                        haptic.impact();
-                        toast(`Order canceled · ${o.sym}/USDT ${o.type} ${o.side}`);
-                      }}
-                      style={{ height: 44, justifyContent: 'center' }}>
-                      <View style={{ height: 30, paddingHorizontal: 12, borderRadius: 8, backgroundColor: c.s2, justifyContent: 'center' }}>
-                        <Txt size={12} weight={600}>
-                          Cancel
-                        </Txt>
-                      </View>
-                    </Press>
-                  </View>
-                  <View style={{ flexDirection: 'row', gap: 4 }}>
-                    {[
-                      ['Filled / Amount', `${fmt(0, xad)} / ${fmt(o.amt, xad)}`, 1.2],
-                      ['Price', fmt(o.price, ddp), 1],
-                      ['Trigger', o.stop ? `≤ ${fmt(o.stop, ddp)}` : '--', 1],
-                    ].map(([k, v, f], i) => (
-                      <View key={k as string} style={{ flex: f as number, gap: 2, alignItems: i === 2 ? 'flex-end' : 'flex-start' }}>
-                        <Txt size={12} color={c.t3}>
-                          {k}
-                        </Txt>
-                        <Txt size={12}>{v}</Txt>
-                      </View>
-                    ))}
-                  </View>
-                  <Txt mono size={11} color={c.t3}>
-                    {o.time}
-                  </Txt>
-                </View>
-              );
-            })}
+                    <View style={{ flexDirection: 'row', gap: 4 }}>
+                      {[
+                        ['Filled / Amount', `${fmt(0, xad)} / ${fmt(o.amt, xad)}`, 1.2],
+                        ['Price', fmt(o.price, ddp), 1],
+                        ['Trigger', o.stop ? `≤ ${fmt(o.stop, ddp)}` : '--', 1],
+                      ].map(([k, v, f], i) => (
+                        <View key={k as string} style={{ flex: f as number, gap: 2, alignItems: i === 2 ? 'flex-end' : 'flex-start' }}>
+                          <Txt size={12} color={c.t3}>
+                            {k}
+                          </Txt>
+                          <Txt size={12}>{v}</Txt>
+                        </View>
+                      ))}
+                    </View>
+                    <Txt mono size={11} color={c.t3}>
+                      {o.time}
+                    </Txt>
+                  </Animated.View>
+                );
+              })}
+          </LayoutAnimationConfig>
         </View>
       ) : (
         [sym, 'USDT'].map((k) => (
@@ -622,16 +665,18 @@ function LiteView() {
           <Icon name="chevronDown" size={16} sw={2} color={c.t3} />
         </Press>
         <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 10, marginTop: 6 }}>
-          <Txt size={40} weight={600} ls={-0.035}>
+          <FlashPrice value={q.p} dir={q.dir} size={40} weight={600} ls={-0.035}>
             {fmt(q.p, co.dp)}
-          </Txt>
+          </FlashPrice>
           <Txt size={14} weight={600} color={q.c >= 0 ? c.up : c.dn}>
             {pct(q.c)}
           </Txt>
         </View>
       </Appear>
       <Appear i={1} style={{ marginHorizontal: 16 }}>
-        <AreaChart line={chart.line} area={chart.area} color={chart.up ? c.up : c.dn} height={90} />
+        <Animated.View key={sym} entering={fadeIn}>
+          <AreaChart line={chart.line} area={chart.area} color={chart.up ? c.up : c.dn} height={90} />
+        </Animated.View>
       </Appear>
       <Appear i={2} style={{ marginHorizontal: 16 }}>
         <Seg

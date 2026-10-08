@@ -24,7 +24,10 @@ const pop = cubicBezier(...motion.pop);
 function CoinPicker({ sym, onPress }: { sym: string; onPress: () => void }) {
   const c = useColors();
   return (
-    <Press onPress={onPress} pressedStyle={{ backgroundColor: c.s2 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, paddingLeft: 6, paddingRight: 10, borderRadius: 999, borderWidth: 1, borderColor: c.s4 }}>
+    <Press
+      onPress={onPress}
+      pressedStyle={{ backgroundColor: c.s2 }}
+      style={{ flexDirection: 'row', alignItems: 'center', gap: 8, height: 44, paddingLeft: 6, paddingRight: 10, borderRadius: 999, borderWidth: 1, borderColor: c.s4 }}>
       <CoinGlyph sym={sym} size={30} />
       <Txt size={15} weight={600}>
         {sym}
@@ -67,7 +70,10 @@ export default function Convert() {
               style={{ flex: 1, minWidth: 0, textAlign: 'right', padding: 0, color: c.t1, fontSize: 28, fontFamily: fontFamily(600) }}
             />
           </View>
-          <Press scale={0.95} onPress={() => patch('convert', { amt: String(+t.avbl.toFixed(convertDp(cv.from))) })} style={{ alignSelf: 'flex-end', height: 28, paddingHorizontal: 10, borderRadius: 8, backgroundColor: c.s2, justifyContent: 'center' }}>
+          <Press
+            scale={0.95}
+            onPress={() => patch('convert', { amt: String(+t.avbl.toFixed(convertDp(cv.from))) })}
+            style={{ alignSelf: 'flex-end', height: 28, paddingHorizontal: 10, borderRadius: 8, backgroundColor: c.s2, justifyContent: 'center' }}>
             <Txt size={12} weight={600}>
               MAX
             </Txt>
@@ -80,7 +86,20 @@ export default function Convert() {
             haptic.tap();
             patch('convert', { from: cv.to, to: cv.from, amt: '', rot: !cv.rot });
           }}
-          style={{ alignSelf: 'center', width: 40, height: 40, marginVertical: -14, zIndex: 1, borderRadius: 10, borderWidth: 1, borderColor: c.s4, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
+          style={{
+            alignSelf: 'center',
+            width: 40,
+            height: 40,
+            marginVertical: -14,
+            zIndex: 1,
+            borderRadius: 10,
+            borderWidth: 1,
+            borderColor: c.s4,
+            backgroundColor: c.bg,
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+          }}>
           <Animated.View style={{ transform: [{ rotate: cv.rot ? '180deg' : '0deg' }], transitionProperty: 'transform', transitionDuration: 450, transitionTimingFunction: pop }}>
             <Icon name="swap" size={18} sw={2.2} />
           </Animated.View>

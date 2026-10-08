@@ -36,7 +36,6 @@ export const useDrafts = create<DraftState>()((set) => ({
   p2p: { side: 'buy', pay: 'All', merchantId: 1, stage: 0, endAt: 0, chat: [] },
   assetsTab: 'overview',
   patch: (k, p) => set((s) => ({ [k]: { ...(s[k] as object), ...p } }) as Partial<DraftState>),
-  selectPair: (sym, price) =>
-    set((s) => ({ spot: { ...s.spot, pair: sym, priceIn: price.toFixed(COINS[sym].dp), stopIn: '', amtIn: '', pct: 0 } })),
+  selectPair: (sym, price) => set((s) => ({ spot: { ...s.spot, pair: sym, priceIn: price.toFixed(COINS[sym].dp), stopIn: '', amtIn: '', pct: 0 } })),
   setAssetsTab: (assetsTab) => set({ assetsTab }),
 }));

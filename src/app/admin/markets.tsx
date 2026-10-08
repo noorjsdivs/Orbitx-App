@@ -26,7 +26,18 @@ export default function AdminMarkets() {
   return (
     <AdminScreen gap={12}>
       <Appear i={0}>
-        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', paddingVertical: 14, paddingHorizontal: 16, borderRadius: 16, backgroundColor: tint(col, 8), borderWidth: 1, borderColor: tint(col, 30) }}>
+        <View
+          style={{
+            flexDirection: 'row',
+            gap: 12,
+            alignItems: 'center',
+            paddingVertical: 14,
+            paddingHorizontal: 16,
+            borderRadius: 16,
+            backgroundColor: tint(col, 8),
+            borderWidth: 1,
+            borderColor: tint(col, 30),
+          }}>
           <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: col }} />
           <View style={{ flex: 1, gap: 2 }}>
             <Txt size={14} weight={600}>
@@ -43,7 +54,18 @@ export default function AdminMarkets() {
           {keys.map((k, i) => {
             const [label, sc, sbg] = statusMeta(c, markets[k]);
             return (
-              <View key={k} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, height: 60, paddingLeft: 14, paddingRight: 8, borderBottomWidth: i < keys.length - 1 ? 1 : 0, borderBottomColor: c.hair }}>
+              <View
+                key={k}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 12,
+                  height: 60,
+                  paddingLeft: 14,
+                  paddingRight: 8,
+                  borderBottomWidth: i < keys.length - 1 ? 1 : 0,
+                  borderBottomColor: c.hair,
+                }}>
                 <View style={{ flex: 1, gap: 3 }}>
                   <Txt size={15} weight={600}>
                     {k}
@@ -59,7 +81,8 @@ export default function AdminMarkets() {
                   {fmt(prices[k].p, COINS[k].dp)}
                 </Txt>
                 <Press scale={0.95} onPress={() => router.push({ pathname: '/sheets/market-status', params: { sym: k } })} style={{ height: 44, justifyContent: 'center' }}>
-                  <View style={{ height: 30, minWidth: 96, paddingHorizontal: 10, borderRadius: 999, backgroundColor: sbg, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <View
+                    style={{ height: 30, minWidth: 96, paddingHorizontal: 10, borderRadius: 999, backgroundColor: sbg, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                     <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: sc }} />
                     <Txt size={12} weight={600} color={sc}>
                       {label}

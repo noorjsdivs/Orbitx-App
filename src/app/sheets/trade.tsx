@@ -39,7 +39,12 @@ export default function TradeSheet() {
   return (
     <SheetBody title="Trade" px={0} gap={0}>
       {ITEMS.map((it) => (
-        <Press key={it.key} scale={1} onPress={() => pick(it)} pressedStyle={{ backgroundColor: c.s2 }} style={{ flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 72, paddingVertical: 10, paddingHorizontal: 16 }}>
+        <Press
+          key={it.key}
+          scale={1}
+          onPress={() => pick(it)}
+          pressedStyle={{ backgroundColor: c.s2 }}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 72, paddingVertical: 10, paddingHorizontal: 16 }}>
           <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: it.accent ? tint(c.ac, 12) : c.s2, alignItems: 'center', justifyContent: 'center' }}>
             <Icon name={it.icon} size={22} color={it.accent ? c.acT : c.t1} />
           </View>

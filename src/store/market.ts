@@ -16,9 +16,7 @@ type MarketState = {
   retry: () => void;
 };
 
-const initial: Record<string, Quote> = Object.fromEntries(
-  Object.keys(COINS).map((k) => [k, { p: COINS[k].p, c: COINS[k].c, dir: 0 as const }]),
-);
+const initial: Record<string, Quote> = Object.fromEntries(Object.keys(COINS).map((k) => [k, { p: COINS[k].p, c: COINS[k].c, dir: 0 as const }]));
 
 /**
  * Simulated price feed: every tick ~65% of pairs random-walk.

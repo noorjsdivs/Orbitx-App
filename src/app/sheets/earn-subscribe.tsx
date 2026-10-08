@@ -32,7 +32,14 @@ export default function EarnSubscribe() {
 
   return (
     <SheetBody title={`Subscribe · ${name}`} closable={false}>
-      <FieldLabel right={<Txt size={13} color={c.t3}>Avbl {fmt(avbl, dp)} {coin}</Txt>}>Amount</FieldLabel>
+      <FieldLabel
+        right={
+          <Txt size={13} color={c.t3}>
+            Avbl {fmt(avbl, dp)} {coin}
+          </Txt>
+        }>
+        Amount
+      </FieldLabel>
       <Field
         value={earn.amt}
         onChangeText={(v) => patch('earn', { amt: decimalInput(v) })}

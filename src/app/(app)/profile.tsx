@@ -53,7 +53,16 @@ function Row({
       pressedStyle={{ backgroundColor: c.s2 }}
       accessibilityRole={toggle != null ? 'switch' : 'button'}
       accessibilityState={toggle != null ? { checked: toggle } : undefined}
-      style={{ flexDirection: 'row', alignItems: 'center', gap: 12, height: tall ? 60 : 48, paddingLeft: 16, paddingRight: right ? 12 : 16, borderBottomWidth: last ? 0 : 1, borderBottomColor: c.hair }}>
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        height: tall ? 60 : 48,
+        paddingLeft: 16,
+        paddingRight: right ? 12 : 16,
+        borderBottomWidth: last ? 0 : 1,
+        borderBottomColor: c.hair,
+      }}>
       <View style={{ flex: 1, gap: 2 }}>
         <Txt size={15} weight={danger ? 500 : 400} color={danger ? c.dn : c.t1}>
           {label}
@@ -105,7 +114,20 @@ export default function Profile() {
             <View style={{ width: 56, height: 56, borderRadius: 28, boxShadow: `0 0 0 2px ${c.s1}, 0 0 0 3.5px ${c.ac}` }}>
               <Image source={{ uri: AVATAR_URL }} style={{ width: 56, height: 56, borderRadius: 28 }} contentFit="cover" />
             </View>
-            <View style={{ position: 'absolute', right: -2, bottom: -2, width: 20, height: 20, borderRadius: 10, backgroundColor: s.kycDone ? c.up : c.warn, borderWidth: 2, borderColor: c.s1, alignItems: 'center', justifyContent: 'center' }}>
+            <View
+              style={{
+                position: 'absolute',
+                right: -2,
+                bottom: -2,
+                width: 20,
+                height: 20,
+                borderRadius: 10,
+                backgroundColor: s.kycDone ? c.up : c.warn,
+                borderWidth: 2,
+                borderColor: c.s1,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
               {s.kycDone ? (
                 <Icon name="check" size={10} sw={4} color="#FFFFFF" />
               ) : (
@@ -251,7 +273,12 @@ export default function Profile() {
       </Group>
 
       <Group title="ACCOUNT" i={4}>
-        <Row label="Identity verification" value={s.kycDone ? 'Level 2' : 'Verify now'} valueColor={s.kycDone ? c.up : c.warn} onPress={() => router.push(s.kycDone ? '/kyc/verified' : '/setup/verification')} />
+        <Row
+          label="Identity verification"
+          value={s.kycDone ? 'Level 2' : 'Verify now'}
+          valueColor={s.kycDone ? c.up : c.warn}
+          onPress={() => router.push(s.kycDone ? '/kyc/verified' : '/setup/verification')}
+        />
         {isAdmin && (
           <Row
             label="Staff console"

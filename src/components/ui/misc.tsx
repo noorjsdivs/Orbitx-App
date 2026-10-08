@@ -1,6 +1,8 @@
 import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 
+import { fadeIn, fadeOut } from '@/components/motion/presets';
+
 import { COINS } from '@/data/market';
 import { useColors } from '@/hooks/use-theme';
 import { tint } from '@/theme/color';
@@ -10,11 +12,7 @@ import { Txt } from './text';
 /** Surface card: s1, 12 radius, 1px line border. */
 export function Card({ children, style, pad = 16, gap = 12 }: { children: React.ReactNode; style?: StyleProp<ViewStyle>; pad?: number; gap?: number }) {
   const c = useColors();
-  return (
-    <View style={[{ padding: pad, gap, borderRadius: 12, backgroundColor: c.s1, borderWidth: 1, borderColor: c.line, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }, style]}>
-      {children}
-    </View>
-  );
+  return <View style={[{ padding: pad, gap, borderRadius: 12, backgroundColor: c.s1, borderWidth: 1, borderColor: c.line, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }, style]}>{children}</View>;
 }
 
 /** Coin glyph: circle with the ticker's first letter in the coin color. */
@@ -71,16 +69,20 @@ export function RowsPanel({ rows, size = 13, keyColor }: { rows: KV[]; size?: nu
   );
 }
 
-/** Warning callout (warn tint). */
+/** Warning callout (warn tint); fades in when a validation message appears. */
 export function Notice({ children, tone = 'warn', size = 13 }: { children: React.ReactNode; tone?: 'warn' | 'danger'; size?: number }) {
   const c = useColors();
   const col = tone === 'warn' ? c.warn : c.dn;
   return (
-    <View style={{ paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: tint(col, 40), backgroundColor: tint(col, 10) }}>
+    <Animated.View
+      entering={fadeIn}
+      exiting={fadeOut}
+      accessibilityLiveRegion="polite"
+      style={{ paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, borderWidth: 1, borderColor: tint(col, 40), backgroundColor: tint(col, 10) }}>
       <Txt size={size} color={col} lh={1.4}>
         {children}
       </Txt>
-    </View>
+    </Animated.View>
   );
 }
 

@@ -88,11 +88,12 @@ export function Header({ title, right, back = true, onBack }: { title: React.Rea
   const router = useRouter();
   const navigation = useNavigation();
   const c = useColors();
-  // Ask this screen's own stack (not the global router) so deep-linked screens get it right.
-  const showBack = back && navigation.canGoBack();
+  const showBack = back;
+  // A screen opened cold from a deep link has no history: fall back to Home.
+  const goBack = () => (navigation.canGoBack() ? router.back() : router.replace('/home'));
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, height: 48, paddingHorizontal: 4 }}>
-      {showBack && <IconButton name="back" label="Back" size={22} sw={2} onPress={onBack ?? (() => router.back())} />}
+      {showBack && <IconButton name="back" label="Back" size={22} sw={2} onPress={onBack ?? goBack} />}
       <View style={{ flex: 1, minWidth: 0, paddingLeft: showBack ? 10 : 12 }}>
         {typeof title === 'string' ? (
           <Txt size={18} weight={600} numberOfLines={1} color={c.t1}>

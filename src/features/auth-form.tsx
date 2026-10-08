@@ -363,7 +363,13 @@ export function AuthForm({ mode }: { mode: 'signin' | 'register' }) {
               </View>
             </Animated.View>
             <Appear i={3} style={{ gap: 12 }}>
-              <Button label={busy ? (isReg ? 'Creating account…' : 'Signing in…') : isReg ? 'Create account' : 'Sign in'} size={16} loading={busy} style={{ opacity: busy ? 0.75 : 1 }} onPress={submit} />
+              <Button
+                label={busy ? (isReg ? 'Creating account…' : 'Signing in…') : isReg ? 'Create account' : 'Sign in'}
+                size={16}
+                loading={busy}
+                style={{ opacity: busy ? 0.75 : 1 }}
+                onPress={submit}
+              />
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 }}>
                 <View style={{ flex: 1, height: 1, backgroundColor: c.line }} />
                 <Txt size={12} color={c.t3}>

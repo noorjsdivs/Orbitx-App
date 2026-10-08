@@ -57,23 +57,17 @@ export function CandleChart({ candles, live, dirUp, axisDp, height = 168 }: { ca
             {candles.map((k, i) => {
               const col = k.c >= k.o ? c.up : c.dn;
               const x = i * cw + 1.2;
-              return (
-                <Rect key={'v' + i} x={x} y={height - (3 + k.v * 18)} width={bw} height={3 + k.v * 18} fill={col} opacity={0.28} />
-              );
+              return <Rect key={'v' + i} x={x} y={height - (3 + k.v * 18)} width={bw} height={3 + k.v * 18} fill={col} opacity={0.28} />;
             })}
             {candles.map((k, i) => {
               const col = k.c >= k.o ? c.up : c.dn;
               const x = i * cw + 1.2;
-              return (
-                <Rect key={'w' + i} x={x + bw / 2 - 0.5} y={Y(k.h)} width={1} height={Math.max(1, Y(k.l) - Y(k.h))} fill={col} />
-              );
+              return <Rect key={'w' + i} x={x + bw / 2 - 0.5} y={Y(k.h)} width={1} height={Math.max(1, Y(k.l) - Y(k.h))} fill={col} />;
             })}
             {candles.map((k, i) => {
               const col = k.c >= k.o ? c.up : c.dn;
               const x = i * cw + 1.2;
-              return (
-                <Rect key={'b' + i} x={x} y={Y(Math.max(k.o, k.c))} width={bw} height={Math.max(1, Math.abs(Y(k.o) - Y(k.c)))} rx={1} fill={col} />
-              );
+              return <Rect key={'b' + i} x={x} y={Y(Math.max(k.o, k.c))} width={bw} height={Math.max(1, Math.abs(Y(k.o) - Y(k.c)))} rx={1} fill={col} />;
             })}
             <Line x1={0} x2={W} y1={Y(live)} y2={Y(live)} stroke={dirCol} strokeWidth={1} strokeDasharray="3,3" opacity={0.8} />
           </Svg>

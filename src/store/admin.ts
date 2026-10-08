@@ -1,15 +1,6 @@
 import { create } from 'zustand';
 
-import {
-  AUDIT_LOG,
-  KYC_QUEUE,
-  MARKET_STATUS,
-  PAYOUT_QUEUE,
-  type AuditEntry,
-  type KycApp,
-  type MarketStatus,
-  type Payout,
-} from '@/data/fixtures';
+import { AUDIT_LOG, KYC_QUEUE, MARKET_STATUS, PAYOUT_QUEUE, type AuditEntry, type KycApp, type MarketStatus, type Payout } from '@/data/fixtures';
 import { hms } from '@/lib/format';
 
 export type AdminRange = '24h' | '7d' | '30d';

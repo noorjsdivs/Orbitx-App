@@ -24,9 +24,7 @@ export function Press({ style, pressedStyle, scale = 0.97, pressedOpacity, child
   const [down, setDown] = useState(false);
   const s = useSharedValue(1);
   const o = useSharedValue(1);
-  const anim = useAnimatedStyle(() =>
-    pressedOpacity != null ? { transform: [{ scale: s.value }], opacity: o.value } : { transform: [{ scale: s.value }] },
-  );
+  const anim = useAnimatedStyle(() => (pressedOpacity != null ? { transform: [{ scale: s.value }], opacity: o.value } : { transform: [{ scale: s.value }] }));
   return (
     <APressable
       accessibilityRole="button"

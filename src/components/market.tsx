@@ -1,4 +1,8 @@
 import { View } from 'react-native';
+import Animated from 'react-native-reanimated';
+
+import { FlashPrice } from '@/components/motion/flash-price';
+import { fadeOut, listItemEnter, rowLayout } from '@/components/motion/presets';
 
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
@@ -18,7 +22,7 @@ export function MarketRow({ sym, mode = 'spot', onPress }: { sym: string; mode?:
   const c = useColors();
   const q = useMarket((s) => s.prices[sym]);
   const co = COINS[sym];
-  const sub = mode === 'fut' ? `Funding ${(co.fr ?? 0) >= 0 ? '+' : ''}${(co.fr ?? 0).toFixed(4)}%` : mode === 'new' ? `${co.listed} · Vol ${compact(co.v)}` : co.listed ?? `Vol ${compact(co.v)}`;
+  const sub = mode === 'fut' ? `Funding ${(co.fr ?? 0) >= 0 ? '+' : ''}${(co.fr ?? 0).toFixed(4)}%` : mode === 'new' ? `${co.listed} · Vol ${compact(co.v)}` : (co.listed ?? `Vol ${compact(co.v)}`);
   return (
     <Press
       onPress={onPress}
@@ -42,9 +46,9 @@ export function MarketRow({ sym, mode = 'spot', onPress }: { sym: string; mode?:
         </Txt>
       </View>
       <View style={{ width: 104, alignItems: 'flex-end', gap: 3 }}>
-        <Txt size={15} weight={500}>
+        <FlashPrice value={q.p} dir={q.dir} size={15} weight={500}>
           {fmt(q.p, co.dp)}
-        </Txt>
+        </FlashPrice>
         <Txt size={12} color={c.t3}>
           ${fmt(q.p, co.dp)}
         </Txt>
@@ -58,9 +62,21 @@ export function MarketRow({ sym, mode = 'spot', onPress }: { sym: string; mode?:
   );
 }
 
+/**
+ * A market row that fades in (staggered by `index`) when the list appears and glides
+ * to its new position when the sort order changes.
+ */
+export function AnimatedMarketRow({ index, ...props }: { index: number; sym: string; mode?: RowMode; onPress?: () => void }) {
+  return (
+    <Animated.View entering={listItemEnter(index)} layout={rowLayout}>
+      <MarketRow {...props} />
+    </Animated.View>
+  );
+}
+
 export function MarketRowSkeleton() {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, height: 60, paddingHorizontal: 16 }}>
+    <Animated.View exiting={fadeOut} style={{ flexDirection: 'row', alignItems: 'center', gap: 12, height: 60, paddingHorizontal: 16 }}>
       <Skel w={32} h={32} r={16} />
       <View style={{ flex: 1, gap: 8 }}>
         <Skel w={84} h={12} />
@@ -68,7 +84,7 @@ export function MarketRowSkeleton() {
       </View>
       <Skel w={72} h={12} />
       <Skel w={76} h={32} r={8} />
-    </View>
+    </Animated.View>
   );
 }
 

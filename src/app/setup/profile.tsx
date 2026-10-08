@@ -30,7 +30,20 @@ export default function SetupProfile() {
       <Appear i={1} style={{ alignItems: 'center' }}>
         <View style={{ width: 88, height: 88 }}>
           <Image source={{ uri: AVATAR_URL }} style={{ width: 88, height: 88, borderRadius: 44, backgroundColor: c.s1 }} contentFit="cover" />
-          <View style={{ position: 'absolute', right: -2, bottom: -2, width: 30, height: 30, borderRadius: 15, backgroundColor: c.s3, borderWidth: 3, borderColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
+          <View
+            style={{
+              position: 'absolute',
+              right: -2,
+              bottom: -2,
+              width: 30,
+              height: 30,
+              borderRadius: 15,
+              backgroundColor: c.s3,
+              borderWidth: 3,
+              borderColor: c.bg,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
             <Icon name="pencil" size={14} sw={2} />
           </View>
         </View>
@@ -39,7 +52,16 @@ export default function SetupProfile() {
         <Txt size={13} color={c.t2}>
           Legal full name
         </Txt>
-        <Field value={name} onChangeText={(v) => set({ name: v })} placeholder="First and last name" autoComplete="name" textContentType="name" autoCapitalize="words" size={16} inputStyle={{ paddingHorizontal: 16 }} />
+        <Field
+          value={name}
+          onChangeText={(v) => set({ name: v })}
+          placeholder="First and last name"
+          autoComplete="name"
+          textContentType="name"
+          autoCapitalize="words"
+          size={16}
+          inputStyle={{ paddingHorizontal: 16 }}
+        />
       </Appear>
       <Appear i={3} style={{ gap: 8 }}>
         <Txt size={13} color={c.t2}>

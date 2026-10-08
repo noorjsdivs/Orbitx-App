@@ -68,7 +68,20 @@ export default function KycSelfie() {
             }}
           />
         )}
-        <View style={{ position: 'absolute', top: 18, left: 18, right: 18, bottom: 18, borderRadius: 125, backgroundColor: c.cam, borderWidth: 1, borderColor: c.line, alignItems: 'center', justifyContent: 'center' }}>
+        <View
+          style={{
+            position: 'absolute',
+            top: 18,
+            left: 18,
+            right: 18,
+            bottom: 18,
+            borderRadius: 125,
+            backgroundColor: c.cam,
+            borderWidth: 1,
+            borderColor: c.line,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
           <Txt mono size={11} ls={0.1} color={c.t4}>
             FRONT CAMERA
           </Txt>

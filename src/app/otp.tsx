@@ -81,13 +81,7 @@ export default function Otp() {
           setErr('Incorrect code. ' + t + ' attempts left.');
           haptic.error();
           shake.set(
-            withSequence(
-              withTiming(-10, { duration: 90 }),
-              withTiming(9, { duration: 90 }),
-              withTiming(-6, { duration: 90 }),
-              withTiming(4, { duration: 90 }),
-              withTiming(0, { duration: 90 }),
-            ),
+            withSequence(withTiming(-10, { duration: 90 }), withTiming(9, { duration: 90 }), withTiming(-6, { duration: 90 }), withTiming(4, { duration: 90 }), withTiming(0, { duration: 90 })),
           );
         } else {
           haptic.success();

@@ -64,7 +64,19 @@ export default function KycReview() {
       </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {['ID FRONT', 'ID BACK', 'SELFIE'].map((t, i) => (
-          <View key={t} style={{ flex: i === 2 ? 0.75 : 1, height: 84, borderRadius: i === 2 ? 42 : 12, backgroundColor: c.s2, borderWidth: 1, borderStyle: 'dashed', borderColor: c.s4, alignItems: 'center', justifyContent: 'center' }}>
+          <View
+            key={t}
+            style={{
+              flex: i === 2 ? 0.75 : 1,
+              height: 84,
+              borderRadius: i === 2 ? 42 : 12,
+              backgroundColor: c.s2,
+              borderWidth: 1,
+              borderStyle: 'dashed',
+              borderColor: c.s4,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
             <Txt mono size={10} color={c.t3}>
               {t}
             </Txt>
@@ -90,12 +102,32 @@ export default function KycReview() {
           </Txt>
         </View>
       )}
-      <Animated.View style={{ maxHeight: rejMode ? 120 : 0, opacity: rejMode ? 1 : 0, overflow: 'hidden', transitionProperty: ['maxHeight', 'opacity'], transitionDuration: [400, 300], transitionTimingFunction: [out, 'ease'] }}>
+      <Animated.View
+        style={{
+          maxHeight: rejMode ? 120 : 0,
+          opacity: rejMode ? 1 : 0,
+          overflow: 'hidden',
+          transitionProperty: ['maxHeight', 'opacity'],
+          transitionDuration: [400, 300],
+          transitionTimingFunction: [out, 'ease'],
+        }}>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingBottom: 4 }}>
           {REASONS.map((r) => {
             const sel = reason === r;
             return (
-              <Press key={r} scale={0.96} onPress={() => setReason(r)} style={{ height: 36, paddingHorizontal: 12, borderRadius: 999, borderWidth: 1, borderColor: sel ? c.dn : c.s4, backgroundColor: sel ? tint(c.dn, 12) : 'transparent', justifyContent: 'center' }}>
+              <Press
+                key={r}
+                scale={0.96}
+                onPress={() => setReason(r)}
+                style={{
+                  height: 36,
+                  paddingHorizontal: 12,
+                  borderRadius: 999,
+                  borderWidth: 1,
+                  borderColor: sel ? c.dn : c.s4,
+                  backgroundColor: sel ? tint(c.dn, 12) : 'transparent',
+                  justifyContent: 'center',
+                }}>
                 <Txt size={12} weight={500} color={sel ? c.dn : c.t2}>
                   {r}
                 </Txt>

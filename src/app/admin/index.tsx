@@ -88,17 +88,16 @@ export default function AdminOverview() {
 
   return (
     <AdminScreen replayKey={range}>
-      <SlidingSeg<AdminRange>
-        h={40}
-        size={13}
-        options={(['24h', '7d', '30d'] as AdminRange[]).map((r) => ({ value: r, label: r }))}
-        value={range}
-        onChange={(r) => set({ range: r })}
-      />
+      <SlidingSeg<AdminRange> h={40} size={13} options={(['24h', '7d', '30d'] as AdminRange[]).map((r) => ({ value: r, label: r }))} value={range} onChange={(r) => set({ range: r })} />
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {kpis.map((x, i) => (
           <Appear key={x.l} i={i} dy={12} style={{ width: '48.4%' }}>
-            <Press scale={0.98} disabled={!x.tap} onPress={x.tap} pressedStyle={{ backgroundColor: c.s2 }} style={{ padding: 14, gap: 6, borderRadius: 10, backgroundColor: c.s1, borderWidth: 1, borderColor: c.line }}>
+            <Press
+              scale={0.98}
+              disabled={!x.tap}
+              onPress={x.tap}
+              pressedStyle={{ backgroundColor: c.s2 }}
+              style={{ padding: 14, gap: 6, borderRadius: 10, backgroundColor: c.s1, borderWidth: 1, borderColor: c.line }}>
               <Txt size={12} color={c.t3}>
                 {x.l}
               </Txt>
@@ -181,7 +180,11 @@ export default function AdminOverview() {
             </Txt>
           </View>
           {alerts.map(([sev, col, bg, t, ago]) => (
-            <Press key={t} scale={1} onPress={() => toast('Opened in risk console')} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 10, borderTopWidth: 1, borderTopColor: c.hair }}>
+            <Press
+              key={t}
+              scale={1}
+              onPress={() => toast('Opened in risk console')}
+              style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 10, paddingVertical: 10, borderTopWidth: 1, borderTopColor: c.hair }}>
               <View style={{ paddingHorizontal: 6, paddingVertical: 3, borderRadius: 5, backgroundColor: bg, marginTop: 1 }}>
                 <Txt size={10} weight={700} color={col}>
                   {sev}

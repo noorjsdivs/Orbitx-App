@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react';
 import { TextInput, View } from 'react-native';
 
 import { IconButton, Screen } from '@/components/layout/screen';
-import { EmptyState, ErrorState, MarketRow, MarketRowSkeleton } from '@/components/market';
+import { MarketRefresh } from '@/components/motion/refresh';
+import { AnimatedMarketRow, EmptyState, ErrorState, MarketRowSkeleton } from '@/components/market';
 import { UnderlineTabs } from '@/components/ui/controls';
 import { Icon } from '@/components/ui/icon';
 import { Press } from '@/components/ui/press';
@@ -140,7 +141,7 @@ export default function Markets() {
   );
 
   return (
-    <Screen top={header}>
+    <Screen top={header} refreshControl={<MarketRefresh />}>
       {st === 'loading' && [1, 2, 3, 4, 5, 6, 7, 8].map((i) => <MarketRowSkeleton key={i} />)}
       {st === 'error' && (
         <ErrorState card={false} primary cta="Try again" title="Market data unavailable" body="We couldn't reach the price feed. Your funds and open orders are not affected." onRetry={retry} />
@@ -161,9 +162,10 @@ export default function Markets() {
         </View>
       )}
       {st === 'ok' &&
-        list.map((k) => (
-          <MarketRow
+        list.map((k, i) => (
+          <AnimatedMarketRow
             key={k}
+            index={i}
             sym={k}
             mode={tab === 'futures' ? 'fut' : tab === 'new' ? 'new' : 'spot'}
             onPress={() => (tab === 'futures' ? goTab('futures') : router.push(`/coin/${k}`))}
