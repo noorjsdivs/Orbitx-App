@@ -17,10 +17,24 @@
   system ported from the design's spec.
 </p>
 
+<p align="center">
+  <a href="https://www.youtube.com/@reactjsBD"><img alt="YouTube @reactjsBD" src="https://img.shields.io/badge/YouTube-%40reactjsBD-FF0000?style=for-the-badge&logo=youtube&logoColor=white" /></a>
+  <a href="https://medium.com/@reactbd"><img alt="Medium @reactbd" src="https://img.shields.io/badge/Medium-%40reactbd-000000?style=for-the-badge&logo=medium&logoColor=white" /></a>
+  <a href="https://github.com/noorjsdivs"><img alt="GitHub noorjsdivs" src="https://img.shields.io/badge/GitHub-noorjsdivs-181717?style=for-the-badge&logo=github&logoColor=white" /></a>
+  <a href="https://noormohammad.reactbd.com/"><img alt="Website noormohammad.reactbd.com" src="https://img.shields.io/badge/Website-noormohammad.reactbd.com-2563EB?style=for-the-badge&logo=googlechrome&logoColor=white" /></a>
+</p>
+
+> [!TIP]
+> **Designed with Claude Design, coded with Claude Code.** The whole app was built from the design handoff in this repo. You'll find the prompts in [How this app was built](#how-this-app-was-built).
+>
+> 📺 For build videos, subscribe on **[YouTube @reactjsBD](https://www.youtube.com/@reactjsBD)**. ✍️ For write-ups on AI, careers and money, follow **[Medium @reactbd](https://medium.com/@reactbd)**. ⭐ If this repo helps you, give it a star.
+
 ---
 
 ## Contents
 
+- [Quick start](#quick-start)
+- [How this app was built](#how-this-app-was-built)
 - [Motion preview](#motion-preview)
 - [Screenshots](#screenshots)
 - [Features](#features)
@@ -35,8 +49,58 @@
 - [Building for production](#building-for-production)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
+- [Author](#author)
+- [License](#license)
 
 ---
+
+## Quick start
+
+You don't need API keys, a `.env` file or a backend. Everything runs on simulated data.
+
+```bash
+git clone https://github.com/noorjsdivs/Orbitx-App.git
+cd Orbitx-App
+npm install
+npm run ios        # macOS + Xcode 27 or newer
+npm run android    # Android Studio + an emulator or device
+```
+
+For the requirements and every step, see [Getting started](#getting-started). If you get stuck, check [Troubleshooting](#troubleshooting).
+
+## How this app was built
+
+ORBITX went from idea to running app with two AI tools.
+
+1. **Design: Claude Design.** It produced the full clickable prototype: every screen, both themes and the motion spec. The handoff it exported is committed here as [`ORBITX Crypto Exchange App-handoff.zip`](ORBITX%20Crypto%20Exchange%20App-handoff.zip).
+2. **Code: [Claude Code](https://claude.com/claude-code).** It read the handoff and built the app with Expo Router and TypeScript. It followed the project rules in [`AGENTS.md`](AGENTS.md), then ran the type checker, lint and Expo Doctor, and fixed what they found.
+
+These are the prompts shown in the build video. Use them to recreate the app or adapt them to your own idea.
+
+<details>
+<summary><b>Design prompt (Claude Design)</b></summary>
+
+```text
+Design ORBITX, a crypto exchange and wallet app for iPhone. Dark first. It should feel
+familiar to people who already trade on the big exchanges, but have its own look. Cover the
+whole journey: sign up, verification, home, markets, coin details, spot and futures trading,
+convert, P2P, deposit and withdraw, earn, orders, notifications, profile, and search. Make it
+a live, clickable prototype.
+```
+</details>
+
+<details>
+<summary><b>Build prompt (Claude Code)</b></summary>
+
+```text
+Build ORBITX from the Claude Design handoff zip. Read its README first, then version three,
+in full. Follow AGENTS.md. Use Expo Router and TypeScript, and build every screen, both
+themes, native bottom sheets, and the design's motion, pixel for pixel. Before you say you're
+done, run the type checker, lint, and Expo Doctor, and fix everything they find.
+```
+</details>
+
+**Try it yourself:** create a new Expo app (`npx create-expo-app@latest`), copy in `AGENTS.md` and the handoff zip, open Claude Code in that folder and paste the build prompt.
 
 ## Motion preview
 
@@ -182,7 +246,7 @@
 | --- | --- | --- |
 | [Node.js](https://nodejs.org/) | **20.19+** (LTS 22/24 recommended) | `node -v` |
 | npm | 10+ | ships with Node |
-| **iOS** — Xcode | latest from the Mac App Store | macOS only. Open Xcode once to install the iOS simulator runtime |
+| **iOS** — Xcode | **27 or newer** | macOS only. Open Xcode once to install the iOS simulator runtime. Xcode 26.0.x can't compile Expo SDK 57 ([details](#ios-build-fails-weak-must-be-a-mutable-variable)) |
 | **iOS** — CocoaPods | 1.15+ | `brew install cocoapods` (or `sudo gem install cocoapods`) |
 | **Android** — Android Studio | latest | with an Android SDK, platform tools and an emulator ([setup guide](https://docs.expo.dev/workflow/android-studio-emulator/)) |
 | Watchman (optional) | latest | `brew install watchman` — faster file watching on macOS |
@@ -394,6 +458,18 @@ npm run prebuild && npm run ios
 Remove the plugin from `app.json` once you upgrade to an SDK whose template includes `SceneDelegate`.
 </details>
 
+<a id="ios-build-fails-weak-must-be-a-mutable-variable"></a>
+<details>
+<summary><b>iOS build fails: <code>'weak' must be a mutable variable</code></b></summary>
+
+Your Xcode is too old for Expo SDK 57. Xcode 26.0.x ships Swift 6.2, which can't compile `expo-modules-jsi`. Update Xcode to 27 or newer from the Mac App Store, open it once to install the iOS simulator runtime, then do a clean build:
+
+```bash
+xcode-select -p                 # should point at the new Xcode
+rm -rf ios && npm run ios
+```
+</details>
+
 <details>
 <summary><b>CocoaPods: "requires your terminal to be using UTF-8 encoding"</b></summary>
 
@@ -438,7 +514,27 @@ Delete the app from the simulator (long-press → Remove App) or run `xcrun simc
 2. Keep new code in the existing structure: routes in `src/app`, reusable UI in `src/components`, domain logic in `src/features`, state in `src/store`.
 3. Use the design tokens and primitives (`Txt`, `Button`, `Press`, `Card`, `Appear`, motion presets) instead of hard-coded colors and ad-hoc animations.
 4. Run `npm run check` before pushing — typecheck, lint and formatting must pass.
+5. Open a pull request that describes what changed and why. Add screenshots for UI changes.
+
+Found a bug or have an idea? [Open an issue](https://github.com/noorjsdivs/Orbitx-App/issues).
+
+## Author
+
+Hi, I'm **Noor Mohammad**, a software engineer and the founder of ReactBD. I teach React, Next.js and React Native on YouTube and write about AI, careers and money on Medium.
+
+| | |
+| --- | --- |
+| 📺 YouTube | [@reactjsBD](https://www.youtube.com/@reactjsBD) |
+| ✍️ Medium | [@reactbd](https://medium.com/@reactbd) |
+| 💻 GitHub | [noorjsdivs](https://github.com/noorjsdivs) |
+| 🌐 Website | [noormohammad.reactbd.com](https://noormohammad.reactbd.com/) |
+
+If this project helped you, star the repo, subscribe on YouTube and follow on Medium. It really helps.
+
+## License
+
+[MIT](LICENSE). You're free to use, modify and ship it. ORBITX is a demo with simulated data, not a real exchange. Before you handle real funds, wire up your own backend, security and compliance.
 
 ---
 
-<p align="center"><sub>Design: ORBITX Crypto Exchange App (Claude Design handoff) · Built with Expo &amp; React Native</sub></p>
+<p align="center"><sub>Design: ORBITX Crypto Exchange App (Claude Design handoff) · Built with Claude Code, Expo &amp; React Native · by <a href="https://www.youtube.com/@reactjsBD">@reactjsBD</a></sub></p>
